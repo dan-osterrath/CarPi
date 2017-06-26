@@ -1,6 +1,3 @@
-/**
- * (C) 2017 by 3m5. Media GmbH. http://www.3m5.de
- */
 package carpi.log;
 
 import java.util.Collections;
