@@ -61,9 +61,9 @@ public class CarpiConfiguration {
 	private static final String PROP_LOADAVG_PATH = "loadavg.path";
 
 	/**
-	 * Property key for the MBTiles file to use for the map.
+	 * Property key for the MBTiles files to use for the map.
 	 */
-	private static final String PROP_MBTILES_FILE = "mbtiles.file";
+	private static final String PROP_MBTILES_FILES = "mbtiles.files";
 
 	/**
 	 * Property key for the error threshold for latitude/longitude in m.
@@ -86,7 +86,7 @@ public class CarpiConfiguration {
 	private static final String PROP_PAUSE_THRESHOLD = "threshold.pause";
 
 	/**
-	 * Property key for the arget directory for tracking files.
+	 * Property key for the target directory for tracking files.
 	 */
 	private static final String PROP_TRACKING_TARGET_DIR = "tracks.dir";
 
@@ -196,12 +196,12 @@ public class CarpiConfiguration {
 	}
 
 	/**
-	 * Returns the path to the mbtiles file.
+	 * Returns the path to the mbtiles files. Multiple files will be separated by ','. 
 	 * 
-	 * @return mbtiles path
+	 * @return mbtiles paths
 	 */
-	public String getMBTilesFile() {
-		return properties.getProperty(PROP_MBTILES_FILE, "carpi.mbtiles");
+	public String getMBTilesFiles() {
+		return properties.getProperty(PROP_MBTILES_FILES, "carpi.mbtiles");
 	}
 
 	/**
