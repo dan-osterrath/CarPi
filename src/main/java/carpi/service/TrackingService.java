@@ -194,10 +194,12 @@ public class TrackingService {
 		boolean newTrackingFile = false;
 		synchronized (currentPath) {
 			// detect pause / no movement
+			double distanceToLast = 0;
 			GlobalPosition currentPosition = new GlobalPosition(latitude, longitude, altitude);
 			if (lastPosition != null && lastPositionTimestamp != null) {
 				GeodeticMeasurement m = geoCalculator.calculateGeodeticMeasurement(Ellipsoid.WGS84, lastPosition, currentPosition);
-				if (m.getPointToPointDistance() < movementThreshold) {
+				distanceToLast = m.getPointToPointDistance();
+				if (distanceToLast < movementThreshold) {
 					return;
 				}
 
@@ -211,6 +213,7 @@ public class TrackingService {
 			el.setLatitude(latitude);
 			el.setAltitude(altitude);
 			el.setTimestamp(tsLong);
+			el.setDistanceToLast(distanceToLast);
 			currentPath.add(el);
 		}
 

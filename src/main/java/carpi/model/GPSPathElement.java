@@ -23,6 +23,10 @@ public class GPSPathElement {
 	 * Altitude in m.
 	 */
 	private double altitude;
+	/**
+	 * Distance to last path element in m.
+	 */
+	private double distanceToLast;
 
 	/**
 	 * Getter method for the field "latitude".
@@ -99,4 +103,24 @@ public class GPSPathElement {
 	public void setLongitude(double longitude) {
 		this.longitude = longitude;
 	}
+
+	/**
+	 * Getter method for the field "distanceToLast".
+	 *
+	 * @return the distanceToLast
+	 */
+	public double getDistanceToLast() {
+		return distanceToLast;
+	}
+
+	/**
+	 * Setter method for the field "distanceToLast".
+	 *
+	 * @param distanceToLast
+	 *            the distanceToLast to set
+	 */
+	public void setDistanceToLast(double distanceToLast) {
+		this.distanceToLast = distanceToLast;
+	}
+
 }
