@@ -98,7 +98,7 @@ public class MapService {
 
 			MapFile mapFile = new MapFile();
 			try {
-				mapFile.sqlConnection = DriverManager.getConnection("jdbc:sqlite:" + config.getMBTilesFiles());
+				mapFile.sqlConnection = DriverManager.getConnection("jdbc:sqlite:" + fileName);
 				mapFile.psTileData = mapFile.sqlConnection.prepareStatement("SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?");
 
 				// read tiles type from metadata table
@@ -235,6 +235,9 @@ public class MapService {
 	 * @return streamed resource
 	 */
 	public StreamedResource getTile(int z, int x, int y) {
+		// calculate adapted y from MBTiles
+		int ay = (int) (Math.pow(2, z) - y - 1);
+		
 		byte[] imageData = null;
 
 		// try lst map file first
@@ -246,20 +249,20 @@ public class MapService {
 			}
 		}
 		if (lastMapFile != null) {
-			imageData = readTileData(lastMapFile, z, x, y);
+			imageData = readTileData(lastMapFile, z, x, ay);
 		}
 
 		if (imageData != null) {
 			mapFile = lastMapFile;
 		} else {
 			// search other map files
-			List<MapFile> mapFiles = getMatchingMapFiles(z, x, y);
+			List<MapFile> mapFiles = getMatchingMapFiles(z, x, ay);
 			for (MapFile mf : mapFiles) {
 				if (mf == lastMapFile) {
 					// already tried
 					continue;
 				}
-				imageData = readTileData(mf, z, x, y);
+				imageData = readTileData(mf, z, x, ay);
 				if (imageData != null) {
 					// found match
 					mapFile = mf;
