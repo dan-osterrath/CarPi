@@ -26,4 +26,5 @@ yarn-error.log*
 /node_modules
 /coverage
 /src/main/ts/**/*.css.d.ts
+/src/main/ts/**/*.scss.d.ts
 /.idea/

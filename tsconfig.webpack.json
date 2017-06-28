@@ -6,9 +6,9 @@
         "src/main/ts/*"
       ]
     },
-    "outDir": "target/dist",
+    "outDir": "target/webapp",
     "module": "commonjs",
-    "target": "es5",
+    "target": "es6",
     "lib": [
       "es2017",
       "dom"
@@ -31,7 +31,7 @@
   ],
   "exclude": [
     "node_modules",
-    "build",
+    "target",
     "scripts",
     "acceptance-tests",
     "webpack",

@@ -3,11 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "babel-polyfill": "^6.23.0",
+    "material-design-icons": "^3.0.1",
+    "material-ui": "^0.18.5",
     "react": "^15.6.1",
-    "react-dom": "^15.6.1"
+    "react-dom": "^15.6.1",
+    "react-tap-event-plugin": "^2.0.1"
   },
   "devDependencies": {
+    "@types/material-ui": "^0.17.13",
     "@types/react": "^15.0.33",
+    "@types/react-addons-linked-state-mixin": "^0.14.18",
+    "@types/react-dom": "^15.5.1",
+    "@types/react-tap-event-plugin": "0.0.30",
     "autoprefixer": "7.1.0",
     "babel-core": "6.24.1",
     "babel-eslint": "7.2.3",
@@ -80,6 +88,12 @@
     "transformIgnorePatterns": [
       "[/\\\\]node_modules[/\\\\].+\\.(js|jsx)$"
     ],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx"
+    ],
     "moduleNameMapper": {
       "^react-native$": "react-native-web"
     }
@@ -94,7 +108,7 @@
   },
   "proxy": {
     "/api": {
-      "target": "http://localhost:8080/api",
+      "target": "http://localhost:8080/",
       "ws": true
     }
   }
