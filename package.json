@@ -91,5 +91,11 @@
   },
   "eslintConfig": {
     "extends": "react-app"
+  },
+  "proxy": {
+    "/api": {
+      "target": "http://localhost:8080/api",
+      "ws": true
+    }
   }
 }
