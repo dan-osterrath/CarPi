@@ -1,41 +1,39 @@
 import * as React from 'react';
 import * as styles from './MainNavigation.scss';
 
-import {BottomNavigation, BottomNavigationItem} from 'material-ui';
+import {BottomNavigation, BottomNavigationItem, Paper} from 'material-ui';
+import IconDashboard from 'material-ui/svg-icons/action/dashboard';
+import IconMap from 'material-ui/svg-icons/maps/map';
 import IconLocationOn from 'material-ui/svg-icons/communication/location-on';
-const nearbyIcon = <IconLocationOn />;
+import IconTablet from 'material-ui/svg-icons/hardware/tablet';
+import IconCar from 'material-ui/svg-icons/maps/directions-car';
 
-interface MainNavigationState {
+interface MainNavigationProps {
     selectedTab: number;
+    onTabChanged: (tab: number) => void;
 }
 
-class MainNavigation extends React.Component<{}, MainNavigationState> {
+class MainNavigation extends React.Component<MainNavigationProps, {}> {
     constructor() {
         super();
-        this.state = {
-            selectedTab: 0
-        };
     }
 
     render() {
         return (
-            <div className={styles.mainNavigation}>
-                <div className={styles.contentContainer} />
-                <BottomNavigation selectedIndex={this.state.selectedTab} >
-                    <BottomNavigationItem label="Karte" icon={nearbyIcon} onClick={() => this.select(0)} />
-                    <BottomNavigationItem label="GPS" icon={nearbyIcon} onClick={() => this.select(1)} />
-                    <BottomNavigationItem label="Fahrzeug" icon={nearbyIcon} onClick={() => this.select(2)} />
-                    <BottomNavigationItem label="CarPi" icon={nearbyIcon} onClick={() => this.select(3)} />
+            <Paper zDepth={1} className={styles.mainNavigation}>
+                <BottomNavigation selectedIndex={this.props.selectedTab} >
+                    <BottomNavigationItem label="Dashboard" icon={<IconDashboard />} onClick={() => this.select(0)} />
+                    <BottomNavigationItem label="Karte" icon={<IconMap />} onClick={() => this.select(1)} />
+                    <BottomNavigationItem label="GPS" icon={<IconLocationOn />} onClick={() => this.select(2)} />
+                    <BottomNavigationItem label="Fahrzeug" icon={<IconCar />} onClick={() => this.select(3)} />
+                    <BottomNavigationItem label="CarPi" icon={<IconTablet />} onClick={() => this.select(4)} />
                 </BottomNavigation>
-            </div>
+            </Paper>
         );
     }
 
     private select(tab: number) {
-        this.setState({
-            ...this.state,
-            selectedTab: tab,
-        });
+        this.props.onTabChanged(tab);
     }
 }
 

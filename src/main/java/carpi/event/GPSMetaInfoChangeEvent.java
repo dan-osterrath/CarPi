@@ -9,6 +9,9 @@ import carpi.model.GPSMetaInfo;
  *
  */
 public class GPSMetaInfoChangeEvent {
+	/**
+	 * Meta info.
+	 */
 	private final GPSMetaInfo metaInfo;
 
 	/**

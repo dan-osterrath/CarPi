@@ -4,18 +4,32 @@
   "private": true,
   "dependencies": {
     "babel-polyfill": "^6.23.0",
+    "leaflet": "^1.1.0",
     "material-design-icons": "^3.0.1",
     "material-ui": "^0.18.5",
+    "moment": "^2.18.1",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
-    "react-tap-event-plugin": "^2.0.1"
+    "react-redux": "^5.0.5",
+    "react-tap-event-plugin": "^2.0.1",
+    "redux": "^3.7.1",
+    "redux-actions": "^2.0.3",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.2.0"
   },
   "devDependencies": {
+    "@types/leaflet": "^1.0.63",
     "@types/material-ui": "^0.17.13",
+    "@types/moment": "^2.13.0",
     "@types/react": "^15.0.33",
     "@types/react-addons-linked-state-mixin": "^0.14.18",
     "@types/react-dom": "^15.5.1",
+    "@types/react-redux": "^4.4.45",
     "@types/react-tap-event-plugin": "0.0.30",
+    "@types/redux": "^3.6.0",
+    "@types/redux-actions": "^1.2.6",
+    "@types/redux-logger": "^3.0.0",
+    "@types/redux-thunk": "^2.1.0",
     "autoprefixer": "7.1.0",
     "babel-core": "6.24.1",
     "babel-eslint": "7.2.3",
@@ -54,7 +68,7 @@
     "tslint": "^5.4.3",
     "tslint-loader": "^3.5.3",
     "tslint-react": "^3.0.0",
-    "typescript": "^2.4.1",
+    "typescript": ">= 2.3.1 < 2.4",
     "typings-for-css-modules-loader": "^1.5.0",
     "url-loader": "0.5.8",
     "webpack": "2.6.1",
@@ -108,6 +122,9 @@
   },
   "proxy": {
     "/api": {
+      "target": "http://localhost:8080/"
+    },
+    "/events": {
       "target": "http://localhost:8080/",
       "ws": true
     }

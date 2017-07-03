@@ -1,0 +1,26 @@
+.map {
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+:global {
+  .leaflet-control-attribution {
+    opacity: 0.3;
+  }
+  .leaflet-container {
+    background-color: #fff;
+  }
+
+  .leaflet-marker-icon {
+    background-color: #00bcd4;
+    mask-image: url('room_48px.svg');
+    border-color: transparent;
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .leaflet-marker-pane {
+    filter: drop-shadow(0 0 10px white);
+  }
+}

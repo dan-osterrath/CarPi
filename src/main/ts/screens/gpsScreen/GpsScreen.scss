@@ -1,0 +1,18 @@
+.gpsScreen {
+  .infoPaper {
+    float: left;
+    margin: 20px;
+    width: 300px;
+    height: 504px;
+    > div {
+      height: 100%;
+    }
+  }
+  .mapPaper {
+    float: left;
+    margin: 20px 20px 20px 0;
+    width: 664px;
+    height: 504px;
+    background: #ff0000;
+  }
+}

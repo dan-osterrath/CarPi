@@ -115,7 +115,7 @@ module.exports = {
                 use: [
                     {
                         options: {
-                            tsConfigFile: 'tsconfig.webpack.json',
+                            tsConfigFile: 'tsconfig.json',
                         },
                         loader: require.resolve('tslint-loader'),
                     },
@@ -131,7 +131,7 @@ module.exports = {
             // "file" loader makes sure those assets get served by WebpackDevServer.
             // When you `import` an asset, you get its (virtual) filename.
             // In production, they would get copied to the `build` folder.
-            {
+            /*{
                 exclude: [
                     /\.html$/,
                     /\.(js|jsx)$/,
@@ -147,17 +147,46 @@ module.exports = {
                 options: {
                     name: 'static/media/[name].[hash:8].[ext]',
                 },
-            },
+            },*/
             // "url" loader works like "file" loader except that it embeds assets
             // smaller than specified limit in bytes as data URLs to avoid requests.
             // A missing `test` is equivalent to a match.
-            {
+            /*{
                 test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
                 loader: require.resolve('url-loader'),
                 options: {
                     limit: 10000,
                     name: 'static/media/[name].[hash:8].[ext]',
                 },
+            },*/
+            {
+                exclude: [
+                    /\.html$/,
+                    // We have to write /\.(js|jsx)(\?.*)?$/ rather than just /\.(js|jsx)$/
+                    // because you might change the hot reloading server from the custom one
+                    // to Webpack's built-in webpack-dev-server/client?/, which would not
+                    // get properly excluded by /\.(js|jsx)$/ because of the query string.
+                    // Webpack 2 fixes this, but for now we include this hack.
+                    // https://github.com/facebookincubator/create-react-app/issues/1713
+                    /\.(js|jsx)(\?.*)?$/,
+                    /\.(ts|tsx)(\?.*)?$/,
+                    /\.(css|scss)$/,
+                    /\.json$/,
+                    /\.svg$/
+                ],
+                loader: 'url-loader',
+                query: {
+                    limit: 10000,
+                    name: 'static/media/[name].[hash:8].[ext]'
+                }
+            },
+            // Using 'exports-loader' to create default es6 export for 'classnames' library
+            {
+                test: /classnames/,
+                loader: 'exports-loader',
+                options: {
+                    default: 'module-exports'
+                }
             },
             // Process JS with Babel.
             {
@@ -165,7 +194,7 @@ module.exports = {
                 include: paths.appSrc,
                 loader: require.resolve('ts-loader'),
                 options: {
-                    configFileName: 'tsconfig.webpack.json'
+                    configFileName: 'tsconfig.json'
                 },
             },
             // "postcss" loader applies autoprefixer to our CSS.
@@ -178,6 +207,9 @@ module.exports = {
                 use: [
                     {
                         loader: require.resolve('style-loader'),
+                        options: {
+                            sourceMap: true,
+                        }
                     },
                     {
                         loader: require.resolve('typings-for-css-modules-loader'),
@@ -187,6 +219,7 @@ module.exports = {
                             camelCase: true,
                             importLoaders: 2,
                             localIdentName: '[path][name]__[local]--[hash:base64:5]',
+                            sourceMap: true,
                         }
                     },
                     {
@@ -211,7 +244,8 @@ module.exports = {
                     {
                         loader: require.resolve('resolve-url-loader'),
                         options: {
-                            sourceMap: true
+                            sourceMap: true,
+                            debug: true,
                         }
                     },
                 ],
@@ -221,6 +255,9 @@ module.exports = {
                 use: [
                     {
                         loader: require.resolve('style-loader'),
+                        options: {
+                            sourceMap: true,
+                        }
                     },
                     {
                         loader: require.resolve('typings-for-css-modules-loader'),
@@ -228,8 +265,10 @@ module.exports = {
                             modules: true,
                             namedExport: true,
                             camelCase: true,
-                            importLoaders: 2,
+                            importLoaders: 3,
                             localIdentName: '[path][name]__[local]--[hash:base64:5]',
+                            sourceMap: true,
+                            sass: true,
                         }
                     },
                     {
@@ -264,6 +303,14 @@ module.exports = {
                         }
                     },
                 ]
+            },
+            // "file" loader for svg
+            {
+                test: /\.svg$/,
+                loader: 'file-loader',
+                query: {
+                    name: 'static/media/[name].[hash:8].[ext]'
+                }
             },
 
             // ** STOP ** Are you adding a new loader?

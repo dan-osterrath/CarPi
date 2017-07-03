@@ -26,6 +26,8 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 
 import carpi.config.CarpiConfiguration;
+import carpi.model.MapConfiguration;
+import carpi.model.MapConfiguration.TilesType;
 import carpi.model.StreamedResource;
 
 /**
@@ -54,6 +56,11 @@ public class MapService {
 	private MapFile lastMatchedMapFile;
 
 	/**
+	 * Map configuration for client.
+	 */
+	private MapConfiguration mapConfig;
+
+	/**
 	 * Class logger.
 	 */
 	@Inject
@@ -77,6 +84,9 @@ public class MapService {
 				.map(this::openMBTilesFile) //
 				.filter(Objects::nonNull) //
 				.collect(Collectors.toList());
+
+		// create map configuration
+		this.mapConfig = createMapConfig();
 	}
 
 	/**
@@ -203,6 +213,50 @@ public class MapService {
 	}
 
 	/**
+	 * Extracts the client map configuration from the tiles. If there are nno tiles available it will return <code>null</code>.
+	 * 
+	 * @return map configuration
+	 */
+	private MapConfiguration createMapConfig() {
+		if (mapFiles == null || mapFiles.isEmpty()) {
+			return null;
+		}
+
+		MapConfiguration c = new MapConfiguration();
+		mapFiles.forEach(mf -> {
+			c.setMinZoom(c.getMinZoom() > 0 ? Math.min(c.getMinZoom(), mf.minZ) : mf.minZ);
+			c.setMaxZoom(c.getMaxZoom() > 0 ? Math.max(c.getMaxZoom(), mf.maxZ) : mf.maxZ);
+			MapConfiguration.TilesType t = getTitlesType(mf);
+			if (c.getType() == null) {
+				c.setType(t);
+			} else if (c.getType() != t) {
+				if (t != null) {
+					log.log(Level.WARNING, "Not all map files have the same tiles type! This will cause trouble on the client!");
+				}
+			}
+		});
+
+		return c;
+	}
+
+	/**
+	 * Returns the tiles type for the given map file.
+	 * 
+	 * @param mf
+	 *            map file.
+	 * @return tiles type
+	 */
+	private MapConfiguration.TilesType getTitlesType(MapFile mf) {
+		if (StringUtils.endsWithIgnoreCase(mf.tilesFileExtension, "png")) {
+			return TilesType.PNG;
+		} else if (StringUtils.endsWithIgnoreCase(mf.tilesFileExtension, "pbf")) {
+			return TilesType.VECTOR;
+		} else {
+			return null;
+		}
+	}
+
+	/**
 	 * Closes the map service.
 	 */
 	@PreDestroy
@@ -224,6 +278,15 @@ public class MapService {
 	}
 
 	/**
+	 * Returns the map configuration.
+	 * 
+	 * @return map configuration
+	 */
+	public MapConfiguration getMapConfig() {
+		return mapConfig;
+	}
+
+	/**
 	 * Loads the tile with the given coordinates and zoom level as streamed resource.
 	 * 
 	 * @param z
@@ -237,7 +300,7 @@ public class MapService {
 	public StreamedResource getTile(int z, int x, int y) {
 		// calculate adapted y from MBTiles
 		int ay = (int) (Math.pow(2, z) - y - 1);
-		
+
 		byte[] imageData = null;
 
 		// try lst map file first

@@ -113,7 +113,7 @@ module.exports = {
                 use: [
                     {
                         options: {
-                            tsConfigFile: 'tsconfig.webpack.json',
+                            tsConfigFile: 'tsconfig.json',
 
                         },
                         loader: require.resolve('tslint-loader'),
@@ -162,7 +162,7 @@ module.exports = {
                 include: paths.appSrc,
                 loader: require.resolve('ts-loader'),
                 options: {
-                    configFileName: 'tsconfig.webpack.json'
+                    configFileName: 'tsconfig.json'
                 },
             },
             // The notation here is somewhat confusing.

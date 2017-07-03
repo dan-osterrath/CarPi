@@ -5,11 +5,14 @@ import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import carpi.model.MapConfiguration;
 import carpi.model.StreamedResource;
 import carpi.service.MapService;
 
@@ -27,6 +30,18 @@ public class MapEndpoint extends StreamingEndpoint {
 	 */
 	@Inject
 	private MapService mapService;
+
+	/**
+	 * Returns the map configuration.
+	 * 
+	 * @return map configuration
+	 */
+	@GET
+	@Path("/config")
+	@Produces(MediaType.APPLICATION_JSON)
+	public MapConfiguration getMapConfig() {
+		return mapService.getMapConfig();
+	}
 
 	/**
 	 * Returns the map tile for the given coordinates and zoom level.
