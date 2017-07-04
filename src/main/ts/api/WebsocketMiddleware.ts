@@ -10,7 +10,10 @@ const createWebsocketMiddleware = ((url: string): Middleware => {
     let socket: WebSocket|null = null;
 
     const onOpen = (ws: WebSocket, store: MiddlewareAPI<{}>) => (evt: Event) => store.dispatch(websocketConnected());
-    const onClose = (ws: WebSocket, store: MiddlewareAPI<{}>) => (evt: Event) => store.dispatch(websocketDisconnected());
+    const onClose = (ws: WebSocket, store: MiddlewareAPI<{}>) => (evt: Event) => {
+        socket = null;
+        store.dispatch(websocketDisconnected());
+    };
     const onMessage = (ws: WebSocket, store: MiddlewareAPI<{}>) => (evt: MessageEvent) => {
         try {
             const msg: EventMessage = JSON.parse(evt.data);

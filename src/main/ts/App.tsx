@@ -2,7 +2,7 @@ import * as React from 'react';
 import {connect, ProviderProps} from 'react-redux';
 
 import * as styles from './App.scss';
-import {loadInitialData} from './actions/actions';
+import {loadInitialData, subscribeEvent, unsubscribeEvent} from './actions/actions';
 import {AppState as GlobalAppState, isWebSocketConnected} from './reducers/reducers';
 import MainNavigation from './components/mainNavigation/MainNavigation';
 import Dashboard from './screens/dashboard/Dashboard';
@@ -10,9 +10,12 @@ import MapScreen from './screens/mapScreen/MapScreen';
 import GpsScreen from './screens/gpsScreen/GpsScreen';
 import Obd2Screen from './screens/obd2Screen/Obd2Screen';
 import HealthScreen from './screens/healthScreen/HealthScreen';
+import {EVENT_NAME as GPSMetaInfoChangeEventName} from './api/model/GPSMetaInfoChangeEvent';
 
 interface ContainerDispatchProps {
     loadInitialData: () => void;
+    subscribeGpsMeta: () => void;
+    unsubscribeGpsMeta: () => void;
 }
 
 interface ContainerStateProps {
@@ -32,12 +35,22 @@ class App extends React.Component<AppProps, AppState> {
     constructor(props: AppProps) {
         super(props);
         this.state = {
-            selectedMainTab: 0
+            selectedMainTab: 0,
         };
     }
 
     componentDidMount() {
         this.props.loadInitialData();
+    }
+
+    componentWillUnmount() {
+        this.props.unsubscribeGpsMeta();
+    }
+
+    componentWillReceiveProps(newProps: AppProps) {
+        if (newProps.websocketConnected && !this.props.websocketConnected) {
+            this.props.subscribeGpsMeta();
+        }
     }
 
     render() {
@@ -89,7 +102,9 @@ const App$$ = connect<ContainerStateProps, ContainerDispatchProps, ContainerOwnP
         websocketConnected: isWebSocketConnected(state),
     }),
     (dispatch, ownProps: ContainerOwnProps): ContainerDispatchProps => ({
-        loadInitialData: () => dispatch(loadInitialData())
+        loadInitialData: () => dispatch(loadInitialData()),
+        subscribeGpsMeta: () => dispatch(subscribeEvent(GPSMetaInfoChangeEventName)),
+        unsubscribeGpsMeta: () => dispatch(unsubscribeEvent(GPSMetaInfoChangeEventName)),
     })
 )(App);
 

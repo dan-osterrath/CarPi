@@ -91,7 +91,7 @@ public class EventEndpoint {
 	 */
 	@OnMessage
 	public void onMessage(String message, Session session) {
-		log.info("Received message from client: " + message);
+		log.fine("Received message from client: " + message);
 		Map<String, String> msg;
 		try {
 			msg = objectMapper.readValue(message, new TypeReference<HashMap<String, String>>() {

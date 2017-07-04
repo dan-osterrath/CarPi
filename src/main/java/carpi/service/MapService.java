@@ -10,12 +10,16 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -39,6 +43,11 @@ import carpi.model.StreamedResource;
  */
 @ApplicationScoped
 public class MapService {
+
+	/**
+	 * Regexp pattern to extract index columns.
+	 */
+	private final Pattern INDEX_COLUMNS = Pattern.compile(".+ ON .+ \\((.+)\\).*", Pattern.CASE_INSENSITIVE);
 
 	/**
 	 * Lock object to access {@link MapService#lastMatchedMapFile}.
@@ -111,6 +120,9 @@ public class MapService {
 				mapFile.sqlConnection = DriverManager.getConnection("jdbc:sqlite:" + fileName);
 				mapFile.psTileData = mapFile.sqlConnection.prepareStatement("SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?");
 
+				// check indices
+				checkIndices(mapFile);
+
 				// read tiles type from metadata table
 				readTilesFormat(mapFile);
 
@@ -132,19 +144,99 @@ public class MapService {
 	}
 
 	/**
+	 * Checks if the map file has the suggested indizes and creates them if not.
+	 * 
+	 * @param mapFile
+	 *            map file to validate
+	 */
+	private void checkIndices(MapFile mapFile) {
+		Statement stmt = null;
+		ResultSet rs = null;
+		boolean hasZoomIndex = false;
+		boolean hasTileIndex = false;
+		try {
+			stmt = mapFile.sqlConnection.createStatement();
+			rs = stmt.executeQuery("SELECT sql FROM sqlite_master WHERE type='index' AND tbl_name='tiles'");
+			while (rs.next()) {
+				String sql = rs.getString(1);
+				Matcher m = INDEX_COLUMNS.matcher(sql);
+				if (m.matches()) {
+					Set<String> columns = Arrays.asList(m.group(1).split(",")).stream().map(StringUtils::trim).collect(Collectors.toSet());
+					if (columns.size() == 1 && columns.contains("zoom_level")) {
+						hasZoomIndex = true;
+					} else if (columns.size() == 3 && columns.containsAll(Arrays.asList("zoom_level", "tile_row", "tile_column"))) {
+						hasTileIndex = true;
+					}
+				}
+			}
+		} catch (SQLException e) {
+			log.log(Level.WARNING, "Cold not load tiles indices", e);
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+			if (stmt != null) {
+				try {
+					stmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+
+		if (!hasZoomIndex) {
+			log.log(Level.INFO, "Index for zoom level not found. Creating new...");
+			createIndex("CREATE INDEX IF NOT EXISTS idx_tiles_zoom_level ON tiles (zoom_level)", mapFile);
+		}
+		if (!hasTileIndex) {
+			log.log(Level.INFO, "Index for tiles not found. Creating new...");
+			createIndex("CREATE UNIQUE INDEX IF NOT EXISTS idx_tiles_tile ON tiles (zoom_level, tile_column, tile_row)", mapFile);
+		}
+	}
+
+	/**
+	 * Creates the index with the given SQL in the given map file.
+	 * 
+	 * @param sql
+	 *            create SQL for index
+	 * @param mapFile
+	 *            map file
+	 */
+	private void createIndex(String sql, MapFile mapFile) {
+		long start = System.currentTimeMillis();
+		Statement stmt = null;
+		try {
+			stmt = mapFile.sqlConnection.createStatement();
+			stmt.executeUpdate(sql);
+		} catch (SQLException e) {
+			log.log(Level.WARNING, "Cold not create tiles index", e);
+		} finally {
+			if (stmt != null) {
+				try {
+					stmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		long end = System.currentTimeMillis();
+		log.log(Level.INFO, "Creating index took {0}s", (double)(end-start) / 1000.0);
+	}
+
+	/**
 	 * Reads the tiles format from the database.
 	 * 
 	 * @param mapFile
 	 *            map file to read
 	 */
 	private void readTilesFormat(MapFile mapFile) {
-		PreparedStatement stmt = null;
+		Statement stmt = null;
 		String format = null;
 		ResultSet rs = null;
 		try {
-			stmt = mapFile.sqlConnection.prepareStatement("SELECT value FROM metadata WHERE name = ?");
-			stmt.setString(1, "format");
-			rs = stmt.executeQuery();
+			stmt = mapFile.sqlConnection.createStatement();
+			rs = stmt.executeQuery("SELECT value FROM metadata WHERE name = 'format'");
 			if (rs.next()) {
 				format = rs.getString(1);
 			}

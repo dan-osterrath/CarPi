@@ -3,8 +3,6 @@ import {Actions} from '../actions/actions';
 
 import MapConfiguration from '../api/model/MapConfiguration';
 import GPSData from '../api/model/GPSData';
-import GPSPosition from '../api/model/GPSPosition';
-import GPSMetaInfo from '../api/model/GPSMetaInfo';
 import EventMessage from '../api/model/EventMessage';
 import GPSPositionChangeEvent, {EVENT_NAME as GPSPositionChangeEventName} from '../api/model/GPSPositionChangeEvent';
 import GPSMetaInfoChangeEvent, {EVENT_NAME as GPSMetaInfoChangeEventName} from '../api/model/GPSMetaInfoChangeEvent';
@@ -28,39 +26,6 @@ const reducers = handleActions<AppState, {}>(
             return {
                 ...state,
                 mapConfig: action.payload,
-            };
-        },
-        [Actions.RECEIVE_GPS_DATA]: (state: AppState, action: Action<GPSData>) => {
-            if (action.error || !action.payload) {
-                return state;
-            }
-            return {
-                ...state,
-                gpsData: action.payload,
-            };
-        },
-        [Actions.RECEIVE_GPS_POSITION]: (state: AppState, action: Action<GPSPosition>) => {
-            if (action.error || !action.payload) {
-                return state;
-            }
-            return {
-                ...state,
-                gpsData: {
-                    ...state.gpsData,
-                    position: action.payload,
-                }
-            };
-        },
-        [Actions.RECEIVE_GPS_META]: (state: AppState, action: Action<GPSMetaInfo>) => {
-            if (action.error || !action.payload) {
-                return state;
-            }
-            return {
-                ...state,
-                gpsData: {
-                    ...state.gpsData,
-                    meta: action.payload,
-                }
             };
         },
 
