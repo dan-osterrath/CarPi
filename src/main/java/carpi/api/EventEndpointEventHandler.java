@@ -1,17 +1,18 @@
 package carpi.api;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.websocket.Session;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import carpi.event.DaylightDataChangeEvent;
 import carpi.event.GPSMetaInfoChangeEvent;
@@ -33,20 +34,7 @@ public class EventEndpointEventHandler {
 	 */
 	@Inject
 	private Logger log;
-	
-	/**
-	 * JSON object mapper.
-	 */
-	private ObjectMapper objectMapper;
 
-	/**
-	 * Initializes the event handler.
-	 */
-	@PostConstruct
-	private void initialize() {
-		objectMapper = new ObjectMapper();
-	}
-	
 	/**
 	 * Sends an event to all registered clients.
 	 * 
@@ -54,26 +42,62 @@ public class EventEndpointEventHandler {
 	 *            event to send
 	 */
 	private void sendEventToClients(Object event) {
-		synchronized (EventEndpoint.clientSessions) {
-			if (EventEndpoint.clientSessions.isEmpty()) {
-				return;
-			}
-			String type = event.getClass().getSimpleName();
+		sendEventToClients(event.getClass().getSimpleName(), event);
+	}
 
-			EventMessage evtMsg = new EventMessage();
-			evtMsg.setType(type);
-			evtMsg.setEvent(event);
-			
-			String msg;
-			try {
-				msg = objectMapper.writeValueAsString(evtMsg);
-			} catch (JsonProcessingException e) {
-				log.log(Level.WARNING, "Could not encode message", e);
-				return;
+	/**
+	 * Sends an event to all registered clients.
+	 * 
+	 * @param eventType
+	 *            event type to look in subscriptions
+	 * @param event
+	 *            event to send
+	 */
+	private void sendEventToClients(String eventType, Object event) {
+		if (StringUtils.isEmpty(eventType)) {
+			// no event type -> send to all
+			synchronized (EventEndpoint.clientSessions) {
+				sendEventToClients(EventEndpoint.clientSessions, event);
 			}
-
-			EventEndpoint.clientSessions.forEach(s -> sendMessageToClient(msg, s));
+		} else {
+			// send only to subscriptions
+			synchronized (EventEndpoint.subscriptions) {
+				List<Session> subscriptions = EventEndpoint.subscriptions.get(eventType);
+				if (subscriptions == null) {
+					return;
+				}
+				sendEventToClients(subscriptions, event);
+			}
 		}
+	}
+
+	/**
+	 * Sends the event to the given clients.
+	 * 
+	 * @param clients
+	 *            list of clients
+	 * @param event
+	 *            event to send
+	 */
+	private void sendEventToClients(List<Session> clients, Object event) {
+		if (clients.isEmpty()) {
+			return;
+		}
+		String type = event.getClass().getSimpleName();
+
+		EventMessage evtMsg = new EventMessage();
+		evtMsg.setType(type);
+		evtMsg.setEvent(event);
+
+		String msg;
+		try {
+			msg = EventEndpoint.objectMapper.writeValueAsString(evtMsg);
+		} catch (JsonProcessingException e) {
+			log.log(Level.WARNING, "Could not encode message", e);
+			return;
+		}
+
+		clients.forEach(s -> sendMessageToClient(msg, s));
 	}
 
 	/**

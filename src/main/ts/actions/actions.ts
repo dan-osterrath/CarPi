@@ -8,6 +8,7 @@ import MapConfiguration from '../api/model/MapConfiguration';
 import GPSData from '../api/model/GPSData';
 import GPSPosition from '../api/model/GPSPosition';
 import GPSMetaInfo from '../api/model/GPSMetaInfo';
+import EventMessage from '../api/model/EventMessage';
 
 const mapEndpoint: MapEndpoint = new MapEndpoint();
 const gpsEndpoint: GPSEndpoint = new GPSEndpoint();
@@ -27,6 +28,9 @@ const Actions = {
     WEBSOCKET_DISCONNECT: 'websocket/DISCONNECT',
     WEBSOCKET_DISCONNECTED: 'websocket/DISCONNECTED',
     WEBSOCKET_SEND: 'websocket/SEND',
+    WEBSOCKET_RECEIVED: 'websocket/RECEIVED',
+    WEBSOCKET_SUBSCRIBE: 'websocket/RECEIVED',
+    WEBSOCKET_UNSUBCRIBE: 'websocket/RECEIVED',
 };
 
 const requestMapConfig = createAction(Actions.REQUEST_MAP_CONFIG);
@@ -73,7 +77,17 @@ const connectWebsocket = createAction(Actions.WEBSOCKET_CONNECT);
 const websocketConnected = createAction(Actions.WEBSOCKET_CONNECTED);
 const disconnectWebsocket = createAction(Actions.WEBSOCKET_DISCONNECT);
 const websocketDisconnected = createAction(Actions.WEBSOCKET_DISCONNECTED);
-const sendWebsocket = createAction<{}, {}>(Actions.WEBSOCKET_CONNECT, (data: {}) => data);
+const sendWebsocket = createAction<{}, {}>(Actions.WEBSOCKET_SEND, (data: {}) => data);
+const receivedWebsocket = createAction<EventMessage, EventMessage>(Actions.WEBSOCKET_RECEIVED, (data: EventMessage) => data);
+
+const subscribeEvent = (event: string) => (dispatch: Dispatch<AppState>): Promise<void> => {
+    dispatch(sendWebsocket({SUBSCRIBE: event}));
+    return Promise.resolve();
+};
+const unsubscribeEvent = (event: string) => (dispatch: Dispatch<AppState>): Promise<void> => {
+    dispatch(sendWebsocket({UNSUBSCRIBE: event}));
+    return Promise.resolve();
+};
 
 const loadInitialData = () => (dispatch: Dispatch<AppState>): Promise<void> => {
     dispatch(loadMapConfig());
@@ -106,6 +120,10 @@ export {
     disconnectWebsocket,
     websocketDisconnected,
     sendWebsocket,
+    receivedWebsocket,
+
+    subscribeEvent,
+    unsubscribeEvent,
 
     loadInitialData,
 };

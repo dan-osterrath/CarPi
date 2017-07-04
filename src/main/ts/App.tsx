@@ -3,6 +3,7 @@ import {connect, ProviderProps} from 'react-redux';
 
 import * as styles from './App.scss';
 import {loadInitialData} from './actions/actions';
+import {AppState as GlobalAppState, isWebSocketConnected} from './reducers/reducers';
 import MainNavigation from './components/mainNavigation/MainNavigation';
 import Dashboard from './screens/dashboard/Dashboard';
 import MapScreen from './screens/mapScreen/MapScreen';
@@ -15,6 +16,7 @@ interface ContainerDispatchProps {
 }
 
 interface ContainerStateProps {
+    websocketConnected: boolean;
 }
 
 type ContainerOwnProps = ProviderProps;
@@ -26,6 +28,7 @@ interface AppState {
 }
 
 class App extends React.Component<AppProps, AppState> {
+
     constructor(props: AppProps) {
         super(props);
         this.state = {
@@ -38,6 +41,9 @@ class App extends React.Component<AppProps, AppState> {
     }
 
     render() {
+        if (!this.props.websocketConnected) {
+            return <div className={styles.app}/>;
+        }
         let screen;
         switch (this.state.selectedMainTab) {
             case 0:
@@ -79,8 +85,8 @@ class App extends React.Component<AppProps, AppState> {
 }
 
 const App$$ = connect<ContainerStateProps, ContainerDispatchProps, ContainerOwnProps>(
-    (state: AppState, ownProps: ContainerOwnProps): ContainerStateProps => ({
-
+    (state: GlobalAppState, ownProps: ContainerOwnProps): ContainerStateProps => ({
+        websocketConnected: isWebSocketConnected(state),
     }),
     (dispatch, ownProps: ContainerOwnProps): ContainerDispatchProps => ({
         loadInitialData: () => dispatch(loadInitialData())

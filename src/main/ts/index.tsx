@@ -17,7 +17,7 @@ injectTapEventPlugin();
 
 const store: Store<AppState> = createStore(
     reducers,
-    applyMiddleware(thunkMiddleware, websocketMiddleware, createLogger())
+    applyMiddleware(thunkMiddleware, createLogger(), websocketMiddleware)
 );
 
 ReactDOM.render(
