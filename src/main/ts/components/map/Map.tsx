@@ -18,6 +18,8 @@ import GPSPosition from '../../api/model/GPSPosition';
 
 import {AppState, getMapConfig} from '../../reducers/reducers';
 
+const MAX_ZOOM = 13;
+
 interface MapComponentProps {
     disableZoom?: boolean;
     position?: GPSPosition;
@@ -68,7 +70,7 @@ class Map extends React.Component<MapProps, {}> {
                 const latLng = new LatLng(nextPosition.latitude, nextPosition.longitude, nextPosition.altitude);
                 const radius = Math.max(nextPosition.latitudeError, nextPosition.longitudeError);
                 const showCircle = this.showCircle(radius, latLng, this.map.getZoom());
-                this.map.setView(latLng, nextProps.mapConfig.maxZoom);
+                this.map.setView(latLng, Math.min(MAX_ZOOM, nextProps.mapConfig.maxZoom));
                 this.marker.setLatLng(latLng);
                 this.circle.options.opacity = showCircle ? 0.8 : 0;
                 this.circle.options.fillOpacity = showCircle ? 0.1 : 0;
@@ -96,9 +98,10 @@ class Map extends React.Component<MapProps, {}> {
             };
 
             const latLng = new LatLng(position.latitude, position.longitude, position.altitude);
-            const zoom = props.mapConfig.maxZoom;
+            const zoom = Math.min(MAX_ZOOM, props.mapConfig.maxZoom);
             this.map = L.map(this.mapContainer, mapOptions).setView(latLng, zoom);
-            L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+            // L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+            L.tileLayer('/api/map/{z}/{x}/{y}', {
                 attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(this.map);
 
