@@ -23,4 +23,33 @@
   .leaflet-marker-pane {
     filter: drop-shadow(0 0 10px white);
   }
+
+  .leaflet-control-zoom-in, .leaflet-control-zoom-out {
+    color: #757575 !important;
+  }
+
+  .leaflet-control-follow {
+    background-color: white;
+    width: 30px;
+    height: 30px;
+
+    .leaflet-control-follow-btn {
+      background-color: #757575;
+      mask-image: url('room_48px.svg');
+      mask-size: 22px 22px;
+      mask-position: 4px 4px;
+      mask-repeat: no-repeat;
+      font: bold 18px 'Lucida Console', Monaco, monospace;
+      text-indent: 1px;
+      font-size: 22px;
+
+      &:hover {
+        background-color: #757575;
+      }
+    }
+
+    &:hover {
+      background-color: #f4f4f4;
+    }
+  }
 }

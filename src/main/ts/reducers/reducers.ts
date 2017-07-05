@@ -3,6 +3,7 @@ import {Actions} from '../actions/actions';
 
 import MapConfiguration from '../api/model/MapConfiguration';
 import GPSData from '../api/model/GPSData';
+import GPSPosition from '../api/model/GPSPosition';
 import EventMessage from '../api/model/EventMessage';
 import GPSPositionChangeEvent, {EVENT_NAME as GPSPositionChangeEventName} from '../api/model/GPSPositionChangeEvent';
 import GPSMetaInfoChangeEvent, {EVENT_NAME as GPSMetaInfoChangeEventName} from '../api/model/GPSMetaInfoChangeEvent';
@@ -86,12 +87,17 @@ function getCurrentGPSData(state: AppState): GPSData|undefined {
     return state.gpsData;
 }
 
+function getCurrentGPSPosition(state: AppState): GPSPosition|undefined {
+    return state.gpsData ? state.gpsData.position : undefined;
+}
+
 export {
     AppState,
 
     isWebSocketConnected,
     getMapConfig,
     getCurrentGPSData,
+    getCurrentGPSPosition,
 };
 
 export default reducers;

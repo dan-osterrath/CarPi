@@ -5,7 +5,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {Provider, Store} from 'react-redux';
 import {createStore, applyMiddleware} from 'redux';
-import {createLogger} from 'redux-logger';
+// import {createLogger} from 'redux-logger';
 import thunkMiddleware from 'redux-thunk';
 import {MuiThemeProvider} from 'material-ui/styles';
 import App from './App';
@@ -17,7 +17,7 @@ injectTapEventPlugin();
 
 const store: Store<AppState> = createStore(
     reducers,
-    applyMiddleware(thunkMiddleware, createLogger(), websocketMiddleware)
+    applyMiddleware(thunkMiddleware, /*createLogger(), */websocketMiddleware)
 );
 
 ReactDOM.render(
