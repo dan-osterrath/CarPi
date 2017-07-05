@@ -17,6 +17,8 @@ import javax.websocket.server.ServerEndpoint;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -50,7 +52,7 @@ public class EventEndpoint {
 	/**
 	 * JSON object mapper.
 	 */
-	final static ObjectMapper objectMapper = new ObjectMapper();
+	final static ObjectMapper objectMapper = new ObjectMapper().setVisibility(PropertyAccessor.FIELD, Visibility.NON_PRIVATE);
 
 	/**
 	 * Handler for opening the session.

@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
@@ -28,6 +29,7 @@ import org.gavaghan.geodesy.GlobalPosition;
 
 import carpi.config.CarpiConfiguration;
 import carpi.event.GPSPositionChangeEvent;
+import carpi.event.GPSTrackChangeEvent;
 import carpi.model.GPSPathElement;
 import carpi.model.GPSPosition;
 import carpi.model.GPSTrack;
@@ -134,6 +136,12 @@ public class TrackingService {
 	private CarpiConfiguration config;
 
 	/**
+	 * Event when the GPS track has been changed.
+	 */
+	@Inject
+	private Event<GPSTrackChangeEvent> gpsTrackChangeEvent;
+	
+	/**
 	 * Initializes the tracking service.
 	 */
 	@PostConstruct
@@ -217,6 +225,8 @@ public class TrackingService {
 			currentPath.add(el);
 		}
 
+		gpsTrackChangeEvent.fire(new GPSTrackChangeEvent(currentPath));
+		
 		// append to tracking file async
 		final boolean newTFFinal = newTrackingFile;
 		executorService.execute(() -> appendTrackElementToTrackingFile(location, newTFFinal));

@@ -12,4 +12,8 @@ interface GPSTrack {
 
 }
 
+export {
+    Element,
+};
+
 export default GPSTrack;

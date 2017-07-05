@@ -19,8 +19,8 @@ import {subscribeEvent, unsubscribeEvent} from '../../actions/actions';
 import {EVENT_NAME as GPSPositionChangeEventName} from '../../api/model/GPSPositionChangeEvent';
 
 interface ContainerDispatchProps {
-    subscribeGpsData: () => void;
-    unsubscribeGpsData: () => void;
+    subscribeGpsPosition: () => void;
+    unsubscribeGpsPosition: () => void;
 }
 
 interface ContainerStateProps {
@@ -38,11 +38,11 @@ class GpsScreen extends React.Component<GpsScreenProps, {}> {
     }
 
     componentDidMount() {
-        this.props.subscribeGpsData();
+        this.props.subscribeGpsPosition();
     }
 
     componentWillUnmount() {
-        this.props.unsubscribeGpsData();
+        this.props.unsubscribeGpsPosition();
     }
 
     render() {
@@ -138,8 +138,8 @@ const GpsScreen$$ = connect<ContainerStateProps, ContainerDispatchProps, Contain
         gpsData: getCurrentGPSData(state),
     }),
     (dispatch, ownProps: ContainerOwnProps): ContainerDispatchProps => ({
-        subscribeGpsData: () => dispatch(subscribeEvent(GPSPositionChangeEventName)),
-        unsubscribeGpsData: () => dispatch(unsubscribeEvent(GPSPositionChangeEventName)),
+        subscribeGpsPosition: () => dispatch(subscribeEvent(GPSPositionChangeEventName)),
+        unsubscribeGpsPosition: () => dispatch(unsubscribeEvent(GPSPositionChangeEventName)),
     })
 )(GpsScreen);
 

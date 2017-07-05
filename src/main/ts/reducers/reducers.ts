@@ -7,6 +7,7 @@ import GPSPosition from '../api/model/GPSPosition';
 import EventMessage from '../api/model/EventMessage';
 import GPSPositionChangeEvent, {EVENT_NAME as GPSPositionChangeEventName} from '../api/model/GPSPositionChangeEvent';
 import GPSMetaInfoChangeEvent, {EVENT_NAME as GPSMetaInfoChangeEventName} from '../api/model/GPSMetaInfoChangeEvent';
+import GPSTrackChangeEvent, {EVENT_NAME as GPSTrackChangeEventName} from '../api/model/GPSTrackChangeEvent';
 
 interface AppState extends Readonly<{}> {
     mapConfig?: MapConfiguration;
@@ -64,6 +65,15 @@ const reducers = handleActions<AppState, {}>(
                         gpsData: {
                             ...state.gpsData,
                             meta: e2.metaInfo,
+                        }
+                    };
+                case GPSTrackChangeEventName:
+                    const e3: GPSTrackChangeEvent = action.payload.event as GPSTrackChangeEvent;
+                    return {
+                        ...state,
+                        gpsData: {
+                            ...state.gpsData,
+                            track: e3.track,
                         }
                     };
                 default:

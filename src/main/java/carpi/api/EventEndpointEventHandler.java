@@ -17,6 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import carpi.event.DaylightDataChangeEvent;
 import carpi.event.GPSMetaInfoChangeEvent;
 import carpi.event.GPSPositionChangeEvent;
+import carpi.event.GPSTrackChangeEvent;
 import carpi.event.HealthStatusChangeEvent;
 import carpi.model.EventMessage;
 
@@ -144,6 +145,16 @@ public class EventEndpointEventHandler {
 	 *            change event
 	 */
 	public void onGPSMetaInfoChanged(@Observes GPSMetaInfoChangeEvent e) {
+		sendEventToClients(e);
+	}
+
+	/**
+	 * Event handler when the GPS track has been changed.
+	 * 
+	 * @param e
+	 *            change event
+	 */
+	public void onGPSTrackChanged(@Observes GPSTrackChangeEvent e) {
 		sendEventToClients(e);
 	}
 

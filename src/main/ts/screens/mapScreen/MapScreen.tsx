@@ -4,18 +4,21 @@ import {connect, ProviderProps} from 'react-redux';
 import * as styles from './MapScreen.scss';
 import Map from '../../components/map/Map';
 
-import {AppState, getCurrentGPSPosition} from '../../reducers/reducers';
-import GPSPosition from '../../api/model/GPSPosition';
+import {AppState, getCurrentGPSData} from '../../reducers/reducers';
+import GPSData from '../../api/model/GPSData';
 import {subscribeEvent, unsubscribeEvent} from '../../actions/actions';
 import {EVENT_NAME as GPSPositionChangeEventName} from '../../api/model/GPSPositionChangeEvent';
+import {EVENT_NAME as GPSTrackChangeEventName} from '../../api/model/GPSTrackChangeEvent';
 
 interface ContainerDispatchProps {
-    subscribeGpsData: () => void;
-    unsubscribeGpsData: () => void;
+    subscribeGpsPosition: () => void;
+    unsubscribeGpsPosition: () => void;
+    subscribeGpsTrack: () => void;
+    unsubscribeGpsTrack: () => void;
 }
 
 interface ContainerStateProps {
-    gpsPosition?: GPSPosition;
+    gpsData?: GPSData;
 }
 
 type ContainerOwnProps = ProviderProps;
@@ -29,17 +32,22 @@ class MapScreen extends React.Component<MapScreenProps, {}> {
     }
 
     componentDidMount() {
-        this.props.subscribeGpsData();
+        this.props.subscribeGpsPosition();
+        this.props.subscribeGpsTrack();
     }
 
     componentWillUnmount() {
-        this.props.unsubscribeGpsData();
+        this.props.unsubscribeGpsPosition();
+        this.props.unsubscribeGpsTrack();
     }
 
     render() {
         return (
             <div className={styles.mapScreen}>
-                <Map position={this.props.gpsPosition}/>
+                <Map
+                    position={this.props.gpsData ? this.props.gpsData.position : undefined}
+                    track={this.props.gpsData ? this.props.gpsData.track : undefined}
+                />
             </div>
         );
     }
@@ -47,11 +55,13 @@ class MapScreen extends React.Component<MapScreenProps, {}> {
 
 const MapScreen$$ = connect<ContainerStateProps, ContainerDispatchProps, ContainerOwnProps>(
     (state: AppState, ownProps: ContainerOwnProps): ContainerStateProps => ({
-        gpsPosition: getCurrentGPSPosition(state),
+        gpsData: getCurrentGPSData(state),
     }),
     (dispatch, ownProps: ContainerOwnProps): ContainerDispatchProps => ({
-        subscribeGpsData: () => dispatch(subscribeEvent(GPSPositionChangeEventName)),
-        unsubscribeGpsData: () => dispatch(unsubscribeEvent(GPSPositionChangeEventName)),
+        subscribeGpsPosition: () => dispatch(subscribeEvent(GPSPositionChangeEventName)),
+        unsubscribeGpsPosition: () => dispatch(unsubscribeEvent(GPSPositionChangeEventName)),
+        subscribeGpsTrack: () => dispatch(subscribeEvent(GPSTrackChangeEventName)),
+        unsubscribeGpsTrack: () => dispatch(unsubscribeEvent(GPSTrackChangeEventName)),
     })
 )(MapScreen);
 

@@ -8,14 +8,17 @@ import * as styles from './Map.scss';
 
 import MapConfiguration from '../../api/model/MapConfiguration';
 import GPSPosition from '../../api/model/GPSPosition';
+import GPSTrack, {Element as TrackElement} from '../../api/model/GPSTrack';
 
 import {AppState, getMapConfig} from '../../reducers/reducers';
 
 const MAX_ZOOM = 13;
+const CLASS_DISABLED = 'leaflet-disabled';
 
 interface MapComponentProps {
     disableZoom?: boolean;
     position?: GPSPosition;
+    track?: GPSTrack;
 }
 
 interface ContainerDispatchProps {
@@ -31,8 +34,11 @@ type MapProps = ContainerOwnProps & ContainerStateProps & ContainerDispatchProps
 
 class Map extends React.Component<MapProps, {}> {
     map: LeafletMap;
+    tiles: L.TileLayer;
+    path?: L.Polyline;
     marker: L.Marker;
     circle: L.CircleMarker;
+    zoomButtons: L.Control;
     followButton: L.Control;
     mapContainer: HTMLDivElement | null;
     zoomInBtn: HTMLAnchorElement;
@@ -50,9 +56,26 @@ class Map extends React.Component<MapProps, {}> {
         this.initializeMap(this.props);
     }
 
+    componentWillUnmount() {
+        if (this.path) {
+            this.map.removeLayer(this.path);
+        }
+        this.map.removeLayer(this.marker);
+        this.map.removeLayer(this.circle);
+        this.map.removeLayer(this.tiles);
+        if (this.followButton) {
+            this.map.removeControl(this.followButton);
+        }
+        if (this.zoomButtons) {
+            this.map.removeControl(this.zoomButtons);
+        }
+        this.map.remove();
+    }
+
     componentWillReceiveProps(nextProps: MapProps) {
         this.initializeMap(nextProps);
         if (this.map) {
+
             if (nextProps.disableZoom !== this.props.disableZoom) {
                 this.map.options.zoomControl = !nextProps.disableZoom;
                 if (nextProps.disableZoom) {
@@ -65,6 +88,7 @@ class Map extends React.Component<MapProps, {}> {
                     this.map.doubleClickZoom.enable();
                 }
             }
+
             const nextPosition = nextProps.position;
             if (nextProps.mapConfig && nextPosition && !this.positionEquals(nextPosition, this.props.position)) {
                 const latLng = new L.LatLng(nextPosition.latitude, nextPosition.longitude, nextPosition.altitude);
@@ -81,6 +105,29 @@ class Map extends React.Component<MapProps, {}> {
                 this.circle.options.fillOpacity = showCircle ? 0.1 : 0;
                 this.circle.setLatLng(latLng);
                 this.circle.setRadius(radius);
+            }
+
+            const nextTrack = nextProps.track;
+            if (this.props.track === undefined && nextTrack !== undefined) {
+                this.createPath();
+                nextTrack.path.map(this.addToPath);
+            } else if (this.props.track !== undefined && nextTrack === undefined) {
+                if (this.path) {
+                    this.map.removeLayer(this.path);
+                    this.path = undefined;
+                }
+            } else if (this.props.track !== undefined && nextTrack !== undefined) {
+                if (this.props.track.path.length !== nextTrack.path.length) {
+                    if (!this.path || this.props.track.start !== nextTrack.start) {
+                        this.createPath();
+                        nextTrack.path.map(this.addToPath);
+                    } else {
+                        nextTrack.path.slice(this.props.track.path.length).map(this.addToPath);
+                    }
+                } else if (!this.path) {
+                    this.createPath();
+                    nextTrack.path.map(this.addToPath);
+                }
             }
         }
     }
@@ -113,7 +160,7 @@ class Map extends React.Component<MapProps, {}> {
             this.map.on('zoomend', this.onZoomEnd);
 
             // L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-            L.tileLayer('/api/map/{z}/{x}/{y}', {
+            this.tiles = L.tileLayer('/api/map/{z}/{x}/{y}', {
                 // attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                 maxNativeZoom: Math.min(MAX_ZOOM, props.mapConfig.maxZoom),
                 minNativeZoom: props.mapConfig.minZoom,
@@ -143,7 +190,8 @@ class Map extends React.Component<MapProps, {}> {
                     options: zoomButtonOptions,
                     onAdd: (map: LeafletMap) => zoomContainer,
                 });
-                this.map.addControl(new ZoomButtons());
+                this.zoomButtons = new ZoomButtons();
+                this.map.addControl(this.zoomButtons);
 
                 // add follow button
                 const followBtn: HTMLAnchorElement = L.DomUtil.create('a', 'leaflet-control-follow-btn') as HTMLAnchorElement;
@@ -272,24 +320,26 @@ class Map extends React.Component<MapProps, {}> {
             }
         }
         if (this.map.options.maxZoom) {
+            const ziClasses = this.zoomInBtn.classList;
             if (this.map.getZoom() < this.map.options.maxZoom) {
-                if (this.zoomInBtn.classList.contains('leaflet-disabled')) {
-                    this.zoomInBtn.classList.remove('leaflet-disabled');
+                if (ziClasses.contains(CLASS_DISABLED)) {
+                    ziClasses.remove(CLASS_DISABLED);
                 }
             } else {
-                if (!this.zoomInBtn.classList.contains('leaflet-disabled')) {
-                    this.zoomInBtn.classList.add('leaflet-disabled');
+                if (!ziClasses.contains(CLASS_DISABLED)) {
+                    ziClasses.add(CLASS_DISABLED);
                 }
             }
         }
         if (this.map.options.minZoom) {
+            const zoClasses = this.zoomOutBtn.classList;
             if (this.map.getZoom() > this.map.options.minZoom) {
-                if (this.zoomOutBtn.classList.contains('leaflet-disabled')) {
-                    this.zoomOutBtn.classList.remove('leaflet-disabled');
+                if (zoClasses.contains(CLASS_DISABLED)) {
+                    zoClasses.remove(CLASS_DISABLED);
                 }
             } else {
-                if (!this.zoomOutBtn.classList.contains('leaflet-disabled')) {
-                    this.zoomOutBtn.classList.add('leaflet-disabled');
+                if (!zoClasses.contains(CLASS_DISABLED)) {
+                    zoClasses.add(CLASS_DISABLED);
                 }
             }
         }
@@ -320,6 +370,26 @@ class Map extends React.Component<MapProps, {}> {
         this.zooming = true;
         this.map.setZoom(this.map.getZoom() - 1, {animate: true, duration: 1});
     };
+
+    private createPath() {
+        if (this.path) {
+            this.map.removeLayer(this.path);
+        }
+
+        const pathOptions: L.PolylineOptions = {
+            interactive: false,
+            color: '#757575',
+            opacity: 0.8,
+        };
+        this.path = L.polyline([], pathOptions).addTo(this.map);
+    }
+
+    private addToPath = (e: TrackElement): void => {
+        const latLng = new L.LatLng(e.latitude, e.longitude, e.altitude);
+        if (this.path) {
+            this.path.addLatLng(latLng);
+        }
+    }
 }
 
 const Map$$ = connect<ContainerStateProps, ContainerDispatchProps, ContainerOwnProps>(
