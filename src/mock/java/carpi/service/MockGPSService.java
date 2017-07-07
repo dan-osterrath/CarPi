@@ -87,6 +87,9 @@ public class MockGPSService implements GPSService {
 	 * Creates a new GPS signal.
 	 */
 	private void fakeIncomingGPSPoition() {
+		if (lastMetaInfo == null || lastMetaInfo.getNumSatellites() == 0) {
+			return;
+		}
 		synchronized (LAST_POSITION_LOCK) {
 			if (lastPosition == null) {
 				lastPosition = new GPSPosition();
@@ -102,9 +105,9 @@ public class MockGPSService implements GPSService {
 				lastPosition.setSpeed(Math.max(0, lastPosition.getSpeed() + getJitter(2.0 / 3.6)));
 				lastPosition.setClimbRate(Math.max(0, lastPosition.getClimbRate() + getJitter(0.5 / 3.6)));
 			}
-			lastPosition.setLongitudeError(30 * Math.random());
-			lastPosition.setLatitudeError(30 * Math.random());
-			lastPosition.setAltitudeError(30 * Math.random());
+			lastPosition.setLongitudeError(100 * Math.random());
+			lastPosition.setLatitudeError(100 * Math.random());
+			lastPosition.setAltitudeError(100 * Math.random());
 			lastPosition.setSpeedError(5 * Math.random());
 			lastPosition.setClimbRateError(5 * Math.random());
 			lastPosition.setTimestamp(((double) System.currentTimeMillis()) / 1000);

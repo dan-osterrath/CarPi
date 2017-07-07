@@ -47,6 +47,7 @@ class MapScreen extends React.Component<MapScreenProps, {}> {
                 <Map
                     position={this.props.gpsData ? this.props.gpsData.position : undefined}
                     track={this.props.gpsData ? this.props.gpsData.track : undefined}
+                    showScale={true}
                 />
             </div>
         );

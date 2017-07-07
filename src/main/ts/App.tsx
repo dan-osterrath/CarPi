@@ -1,5 +1,7 @@
 import * as React from 'react';
 import {connect, ProviderProps} from 'react-redux';
+import {Paper} from 'material-ui';
+import IconError from 'material-ui/svg-icons/alert/error';
 
 import * as styles from './App.scss';
 import {loadInitialData, subscribeEvent, unsubscribeEvent} from './actions/actions';
@@ -31,6 +33,7 @@ interface AppState {
 }
 
 class App extends React.Component<AppProps, AppState> {
+    connectInterval?: number;
 
     constructor(props: AppProps) {
         super(props);
@@ -41,6 +44,7 @@ class App extends React.Component<AppProps, AppState> {
 
     componentDidMount() {
         this.props.loadInitialData();
+        this.connectInterval = setInterval(this.props.loadInitialData, 2000);
     }
 
     componentWillUnmount() {
@@ -49,13 +53,31 @@ class App extends React.Component<AppProps, AppState> {
 
     componentWillReceiveProps(newProps: AppProps) {
         if (newProps.websocketConnected && !this.props.websocketConnected) {
+            if (this.connectInterval !== undefined) {
+                clearInterval(this.connectInterval);
+                this.connectInterval = undefined;
+            }
             this.props.subscribeGpsMeta();
+        } else if (!newProps.websocketConnected && this.props.websocketConnected) {
+            if (this.connectInterval !== undefined) {
+                clearInterval(this.connectInterval);
+            }
+            this.connectInterval = setInterval(this.props.loadInitialData, 2000);
         }
     }
 
     render() {
         if (!this.props.websocketConnected) {
-            return <div className={styles.app}/>;
+            return <div className={styles.app}>
+                <div className={styles.contentContainer}>
+                    <Paper zDepth={3} className={styles.noConnection}>
+                        <IconError className={styles.errorIcon}/>
+                        <div className={styles.errorMessage}>
+                            <h3>Keine Verbindung!</h3>
+                        </div>
+                    </Paper>
+                </div>
+            </div>;
         }
         let screen;
         switch (this.state.selectedMainTab) {
@@ -84,7 +106,10 @@ class App extends React.Component<AppProps, AppState> {
                 <div className={styles.contentContainer}>
                     {screen}
                 </div>
-                <MainNavigation selectedTab={this.state.selectedMainTab} onTabChanged={(tab) => this.onMainNavigationTagChanged(tab)}/>
+                <MainNavigation
+                    selectedTab={this.state.selectedMainTab}
+                    onTabChanged={(tab) => this.onMainNavigationTagChanged(tab)}
+                />
             </div>
         );
     }

@@ -12,13 +12,14 @@ import GPSTrack, {Element as TrackElement} from '../../api/model/GPSTrack';
 
 import {AppState, getMapConfig} from '../../reducers/reducers';
 
-const MAX_ZOOM = 13;
+const MAX_ZOOM = 17;
 const CLASS_DISABLED = 'leaflet-disabled';
 
 interface MapComponentProps {
     disableZoom?: boolean;
     position?: GPSPosition;
     track?: GPSTrack;
+    showScale?: boolean;
 }
 
 interface ContainerDispatchProps {
@@ -40,6 +41,7 @@ class Map extends React.Component<MapProps, {}> {
     circle: L.CircleMarker;
     zoomButtons: L.Control;
     followButton: L.Control;
+    scale?: L.Control.Scale;
     mapContainer: HTMLDivElement | null;
     zoomInBtn: HTMLAnchorElement;
     zoomOutBtn: HTMLAnchorElement;
@@ -57,19 +59,24 @@ class Map extends React.Component<MapProps, {}> {
     }
 
     componentWillUnmount() {
-        if (this.path) {
-            this.map.removeLayer(this.path);
+        if (this.map) {
+            if (this.path) {
+                this.map.removeLayer(this.path);
+            }
+            this.map.removeLayer(this.marker);
+            this.map.removeLayer(this.circle);
+            this.map.removeLayer(this.tiles);
+            if (this.followButton) {
+                this.map.removeControl(this.followButton);
+            }
+            if (this.zoomButtons) {
+                this.map.removeControl(this.zoomButtons);
+            }
+            if (this.scale) {
+                this.map.removeControl(this.scale);
+            }
+            this.map.remove();
         }
-        this.map.removeLayer(this.marker);
-        this.map.removeLayer(this.circle);
-        this.map.removeLayer(this.tiles);
-        if (this.followButton) {
-            this.map.removeControl(this.followButton);
-        }
-        if (this.zoomButtons) {
-            this.map.removeControl(this.zoomButtons);
-        }
-        this.map.remove();
     }
 
     componentWillReceiveProps(nextProps: MapProps) {
@@ -89,6 +96,15 @@ class Map extends React.Component<MapProps, {}> {
                 }
             }
 
+            if (nextProps.showScale !== this.props.showScale) {
+                if (nextProps.showScale) {
+                    this.scale = L.control.scale().addTo(this.map);
+                } else if (this.scale) {
+                    this.map.removeControl(this.scale);
+                    this.scale = undefined;
+                }
+            }
+
             const nextPosition = nextProps.position;
             if (nextProps.mapConfig && nextPosition && !this.positionEquals(nextPosition, this.props.position)) {
                 const latLng = new L.LatLng(nextPosition.latitude, nextPosition.longitude, nextPosition.altitude);
@@ -101,10 +117,14 @@ class Map extends React.Component<MapProps, {}> {
                     });
                 }
                 this.marker.setLatLng(latLng);
-                this.circle.options.opacity = showCircle ? 0.8 : 0;
-                this.circle.options.fillOpacity = showCircle ? 0.1 : 0;
                 this.circle.setLatLng(latLng);
                 this.circle.setRadius(radius);
+                if (showCircle) {
+                    this.circle.addTo(this.map);
+                    this.marker.addTo(this.map);
+                } else {
+                    this.circle.remove();
+                }
             }
 
             const nextTrack = nextProps.track;
@@ -166,6 +186,10 @@ class Map extends React.Component<MapProps, {}> {
                 minNativeZoom: props.mapConfig.minZoom,
             }).addTo(this.map);
 
+            if (this.props.showScale) {
+                this.scale = L.control.scale().addTo(this.map);
+            }
+
             if (!this.props.disableZoom) {
                 // add zoom buttons
                 this.zoomInBtn = L.DomUtil.create('a', 'leaflet-control-zoom-in') as HTMLAnchorElement;
@@ -221,10 +245,13 @@ class Map extends React.Component<MapProps, {}> {
                 interactive: false,
                 weight: 1,
                 radius: radius,
-                opacity: showCircle ? 0.8 : 0,
-                fillOpacity: showCircle ? 0.1 : 0,
+                opacity: 0.8,
+                fillOpacity: 0.1,
             };
-            this.circle = L.circle(latLng, circleOptions).addTo(this.map);
+            this.circle = L.circle(latLng, circleOptions);
+            if (showCircle) {
+                this.circle.addTo(this.map);
+            }
 
             const markerOptions: L.MarkerOptions = {
                 keyboard: false,
