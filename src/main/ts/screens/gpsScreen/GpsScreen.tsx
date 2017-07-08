@@ -46,80 +46,57 @@ class GpsScreen extends React.Component<GpsScreenProps, {}> {
     }
 
     render() {
-        let position = '';
-        let positionError = '';
-        let altitude = '';
-        let altitudeError = '';
-        let speed = '';
-        let speedError = '';
-        let climbRate = '';
-        let climbRateError = '';
-        let time = '';
-        let satellites = '';
-        if (this.props.gpsData) {
-            const p = this.props.gpsData.position;
-            if (p) {
-                position = positionDecimal2Degrees(p.latitude, p.longitude);
-                positionError = `(±${Math.round(p.latitudeError)}m, ±${Math.round(p.longitudeError)}m)`;
-                altitude = `${Math.round(p.altitude)}m`;
-                altitudeError = `(±${Math.round(p.altitudeError)}m)`;
-                speed = `${Math.round(p.speed * 3.6)}km/h`;
-                speedError = `(±${Math.round(p.speedError * 3.6)}km/h)`;
-                climbRate = `${Math.round(p.climbRate)}m/s`;
-                climbRateError = `(±${Math.round(p.climbRateError)}m/s)`;
-                time = moment.unix(p.timestamp).format('DD.MM.YYYY HH:mm');
-            }
-            const m = this.props.gpsData.meta;
-            if (m) {
-                satellites = Math.round(m.numSatellites).toString(10);
-            }
-        }
+        const p = this.props.gpsData ? this.props.gpsData.position : undefined;
+        const m = this.props.gpsData ? this.props.gpsData.meta : undefined;
+
         return (
             <div className={styles.gpsScreen}>
                 <Paper zDepth={1} className={styles.infoPaper}>
                     <Card>
                         <CardMedia>
                             <div>
-                                <List>
-                                    <ListItem
-                                        leftIcon={<IconLocationOn />}
-                                        primaryText={position}
-                                        secondaryText={`Position ${positionError}`}
-                                        disabled={true}
-                                    />
-                                    <ListItem
-                                        leftIcon={<IconTerrain />}
-                                        primaryText={altitude}
-                                        secondaryText={`Höhe ${altitudeError}`}
-                                        disabled={true}
-                                    />
-                                    <Divider inset={true}/>
-                                    <ListItem
-                                        leftIcon={SpeedIcon}
-                                        primaryText={speed}
-                                        secondaryText={`Geschwindigkeit ${speedError}`}
-                                        disabled={true}
-                                    />
-                                    <ListItem
-                                        leftIcon={ClimbRateIcon}
-                                        primaryText={climbRate}
-                                        secondaryText={`Steigrate ${climbRateError}`}
-                                        disabled={true}
-                                    />
-                                    <Divider inset={true}/>
-                                    <ListItem
-                                        leftIcon={SatelliteIcon}
-                                        primaryText={satellites}
-                                        secondaryText="Satelliten"
-                                        disabled={true}
-                                    />
-                                    <ListItem
-                                        leftIcon={<IconSchedule />}
-                                        primaryText={time}
-                                        secondaryText="Zeit"
-                                        disabled={true}
-                                    />
-                                </List>
+                                {p && m ?
+                                    <List>
+                                        <ListItem
+                                            leftIcon={<IconLocationOn />}
+                                            primaryText={positionDecimal2Degrees(p.latitude, p.longitude)}
+                                            secondaryText={`Position (±${Math.round(p.latitudeError)}m, ±${Math.round(p.longitudeError)}m)`}
+                                            disabled={true}
+                                        />
+                                        <ListItem
+                                            leftIcon={<IconTerrain />}
+                                            primaryText={`${Math.round(p.altitude)}m`}
+                                            secondaryText={`Höhe (±${Math.round(p.altitudeError)}m)`}
+                                            disabled={true}
+                                        />
+                                        <Divider inset={true}/>
+                                        <ListItem
+                                            leftIcon={SpeedIcon}
+                                            primaryText={`${Math.round(p.speed * 3.6)}km/h`}
+                                            secondaryText={`Geschwindigkeit (±${Math.round(p.speedError * 3.6)}km/h)`}
+                                            disabled={true}
+                                        />
+                                        <ListItem
+                                            leftIcon={ClimbRateIcon}
+                                            primaryText={`${Math.round(p.climbRate)}m/s`}
+                                            secondaryText={`Steigrate (±${Math.round(p.climbRateError)}m/s)`}
+                                            disabled={true}
+                                        />
+                                        <Divider inset={true}/>
+                                        <ListItem
+                                            leftIcon={SatelliteIcon}
+                                            primaryText={m.numSatellites.toFixed()}
+                                            secondaryText="Satelliten"
+                                            disabled={true}
+                                        />
+                                        <ListItem
+                                            leftIcon={<IconSchedule />}
+                                            primaryText={moment.unix(p.timestamp).format('DD.MM.YYYY HH:mm')}
+                                            secondaryText="Zeit"
+                                            disabled={true}
+                                        />
+                                    </List>
+                                : null}
                             </div>
                         </CardMedia>
                     </Card>

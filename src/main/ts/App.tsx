@@ -83,7 +83,6 @@ class App extends React.Component<AppProps, AppState> {
         switch (this.state.selectedMainTab) {
             case 0:
                 screen = <Dashboard />;
-                screen = <GpsScreen />;
                 break;
             case 1:
                 screen = <MapScreen />;

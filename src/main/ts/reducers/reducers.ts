@@ -8,7 +8,7 @@ import EventMessage from '../api/model/EventMessage';
 import GPSPositionChangeEvent, {EVENT_NAME as GPSPositionChangeEventName} from '../api/model/GPSPositionChangeEvent';
 import GPSMetaInfoChangeEvent, {EVENT_NAME as GPSMetaInfoChangeEventName} from '../api/model/GPSMetaInfoChangeEvent';
 import GPSTrackChangeEvent, {EVENT_NAME as GPSTrackChangeEventName} from '../api/model/GPSTrackChangeEvent';
-import GPSMetaInfo from "../api/model/GPSMetaInfo";
+import GPSMetaInfo from '../api/model/GPSMetaInfo';
 
 interface AppState extends Readonly<{}> {
     mapConfig?: MapConfiguration;

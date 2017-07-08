@@ -1,5 +1,34 @@
 .dashboard {
-  width: 100%;
-  position: fixed;
-  bottom: 0;
+  .infoPaper {
+    float: left;
+    margin: 20px;
+    width: 300px;
+    height: 504px;
+    > div {
+      height: 100%;
+    }
+
+    .speed {
+      font-size: 50px !important;
+      line-height: 50px !important;
+      text-align: right;
+
+      svg {
+        width: 50px !important;
+        height: 50px !important;
+        fill: black !important;
+
+        path, rect {
+          fill: black !important;
+        }
+      }
+    }
+  }
+  .mapPaper {
+    float: left;
+    margin: 20px 20px 20px 0;
+    width: 664px;
+    height: 504px;
+    background: #ff0000;
+  }
 }
