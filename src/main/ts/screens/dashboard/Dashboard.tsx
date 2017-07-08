@@ -8,6 +8,7 @@ import * as moment from 'moment';
 import * as styles from './Dashboard.scss';
 import SpeedIcon from '../../icons/SpeedIcon';
 import DistanceIcon from '../../icons/DistanceIcon';
+import GasIcon from '../../icons/GasIcon';
 import Map from '../../components/map/Map';
 
 import GPSData from '../../api/model/GPSData';
@@ -48,6 +49,7 @@ class Dashboard extends React.Component<DashboardProps, {}> {
         let distance = 0;
         let altitude = 0;
         let time = moment();
+        let gas = 0;
         if (this.props.gpsData) {
             const p = this.props.gpsData.position;
             if (p) {
@@ -79,6 +81,12 @@ class Dashboard extends React.Component<DashboardProps, {}> {
                                         leftIcon={DistanceIcon}
                                         primaryText={`${Math.round(distance / 100) / 10}km`}
                                         secondaryText="Strecke"
+                                        disabled={true}
+                                    />
+                                    <ListItem
+                                        leftIcon={GasIcon}
+                                        primaryText={`${Math.round(gas)}l`}
+                                        secondaryText="Tank"
                                         disabled={true}
                                     />
                                     <ListItem
