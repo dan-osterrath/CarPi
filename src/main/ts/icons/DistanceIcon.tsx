@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-const ClimbRateIcon = <svg
+const DistanceIcon = <svg
     version="1.1"
     xmlns="http://www.w3.org/2000/svg"
     x="0px"
@@ -24,4 +24,4 @@ const ClimbRateIcon = <svg
     </g>
 </svg>;
 
-export default ClimbRateIcon;
+export default DistanceIcon;
