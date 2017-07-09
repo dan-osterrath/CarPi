@@ -191,7 +191,6 @@ public class TrackingService {
 		Double latitudeError = location.getLatitudeError();
 		Double altitudeError = location.getAltitudeError();
 		if (longitudeError != null && latitudeError != null && altitudeError != null) {
-			log.log(Level.INFO, "Error: {0}, {1}, {2}", Arrays.asList(latitudeError, longitudeError, altitudeError).toArray(new Double[3]));
 			if (longitudeError > errorThresholdLatLong || latitudeError > errorThresholdLatLong) {
 				return;
 			}
@@ -209,7 +208,6 @@ public class TrackingService {
 			if (lastPosition != null && lastPositionTimestamp != null) {
 				GeodeticMeasurement m = geoCalculator.calculateGeodeticMeasurement(Ellipsoid.WGS84, lastPosition, currentPosition);
 				distanceToLast = m.getPointToPointDistance();
-				log.log(Level.INFO, "Distance: {0}m", distanceToLast);
 				if (distanceToLast < movementThreshold) {
 					return;
 				}

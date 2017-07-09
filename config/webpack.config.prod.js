@@ -1,15 +1,11 @@
 'use strict';
 
-const autoprefixer = require('autoprefixer');
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
-const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
-const eslintFormatter = require('react-dev-utils/eslintFormatter');
-const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const paths = require('./paths');
 const getClientEnvironment = require('./env');
 
@@ -33,15 +29,22 @@ if (env.stringified['process.env'].NODE_ENV !== '"production"') {
 }
 
 // Note: defined here because it will be used more than once.
-const cssFilename = 'static/css/[name].[contenthash:8].css';
+const cssFilename = 'static/css/[name].[contenthash:8]-css.css';
+const scssFilename = 'static/css/[name].[contenthash:8]-scss.css';
+const extractCss = new ExtractTextPlugin(cssFilename);
+const extractScss = new ExtractTextPlugin(scssFilename);
 
 // ExtractTextPlugin expects the build output to be flat.
 // (See https://github.com/webpack-contrib/extract-text-webpack-plugin/issues/27)
 // However, our output is structured with css, js and media folders.
 // To have this structure working with relative paths, we have to use custom options.
-const extractTextPluginOptions = shouldUseRelativeAssetPaths
+const cssExtractTextPluginOptions = shouldUseRelativeAssetPaths
     ? // Making sure that the publicPath goes back to to build folder.
     {publicPath: Array(cssFilename.split('/').length).join('../')}
+    : {};
+const scssExtractTextPluginOptions = shouldUseRelativeAssetPaths
+    ? // Making sure that the publicPath goes back to to build folder.
+    {publicPath: Array(scssFilename.split('/').length).join('../')}
     : {};
 
 // This is the production configuration.
@@ -89,14 +92,14 @@ module.exports = {
             // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
             'react-native': 'react-native-web',
         },
-        plugins: [
+        /*plugins: [
             // Prevents users from importing files from outside of src/ (or node_modules/).
             // This often causes confusion because we only process files within src/ with babel.
             // To fix this, we prevent you from importing files out of src/ -- if you'd like to,
             // please link the files into your node_modules/ and let module-resolution kick in.
             // Make sure your source files are compiled, as they will not be processed in any way.
             new ModuleScopePlugin(paths.appSrc),
-        ],
+        ],*/
     },
     module: {
         strictExportPresence: true,
@@ -134,27 +137,23 @@ module.exports = {
                     /\.html$/,
                     /\.(js|jsx)$/,
                     /\.(ts|tsx)$/,
-                    /\.css$/,
+                    /\.(css|scss)$/,
                     /\.json$/,
-                    /\.bmp$/,
-                    /\.gif$/,
-                    /\.jpe?g$/,
-                    /\.png$/,
+                    /\.svg/,
                 ],
-                loader: require.resolve('file-loader'),
-                options: {
-                    name: 'static/media/[name].[hash:8].[ext]',
-                },
-            },
-            // "url" loader works just like "file" loader but it also embeds
-            // assets smaller than specified size as data URLs to avoid requests.
-            {
-                test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
                 loader: require.resolve('url-loader'),
-                options: {
+                query: {
                     limit: 10000,
-                    name: 'static/media/[name].[hash:8].[ext]',
-                },
+                    name: 'static/media/[name].[hash:8].[ext]'
+                }
+            },
+            // Using 'exports-loader' to create default es6 export for 'classnames' library
+            {
+                test: /classnames/,
+                loader: 'exports-loader',
+                options: {
+                    default: 'module-exports'
+                }
             },
             // Process JS with Babel.
             {
@@ -179,7 +178,7 @@ module.exports = {
             // in the main CSS file.
             {
                 test: /\.css$/,
-                loader: ExtractTextPlugin.extract(
+                loader: extractCss.extract(
                     Object.assign(
                         {
                             fallback: require.resolve('style-loader'),
@@ -187,6 +186,7 @@ module.exports = {
                                 {
                                     loader: 'typings-for-css-modules-loader',
                                     options: {
+                                        sourceMap: true,
                                         modules: true,
                                         namedExport: true,
                                         camelCase: true,
@@ -196,32 +196,25 @@ module.exports = {
                                 {
                                     loader: require.resolve('postcss-loader'),
                                     options: {
-                                        ident: 'postcss', // https://webpack.js.org/guides/migrating/#complex-options
                                         sourceMap: true,
-                                        plugins: () => [
-                                            require('postcss-flexbugs-fixes'),
-                                            autoprefixer({
-                                                browsers: [
-                                                    '>1%',
-                                                    'last 4 versions',
-                                                    'Firefox ESR',
-                                                    'not ie < 9', // React doesn't support IE8 anyway
-                                                ],
-                                                flexbox: 'no-2009',
-                                            }),
-                                        ],
                                     },
+                                },
+                                {
+                                    loader: require.resolve('resolve-url-loader'),
+                                    options: {
+                                        sourceMap: true
+                                    }
                                 },
                             ],
                         },
-                        extractTextPluginOptions
+                        cssExtractTextPluginOptions
                     )
                 ),
                 // Note: this won't work without `new ExtractTextPlugin()` in `plugins`.
             },
             {
                 test: /\.scss$/,
-                loader: ExtractTextPlugin.extract(
+                loader: extractScss.extract(
                     Object.assign(
                         {
                             fallback: require.resolve('style-loader'),
@@ -229,30 +222,25 @@ module.exports = {
                                 {
                                     loader: 'typings-for-css-modules-loader',
                                     options: {
+                                        sourceMap: true,
+                                        sass: true,
                                         modules: true,
                                         namedExport: true,
                                         camelCase: true,
-                                        importLoaders: 2,
+                                        importLoaders: 3,
                                     }
                                 },
                                 {
                                     loader: require.resolve('postcss-loader'),
                                     options: {
-                                        ident: 'postcss', // https://webpack.js.org/guides/migrating/#complex-options
                                         sourceMap: true,
-                                        plugins: () => [
-                                            require('postcss-flexbugs-fixes'),
-                                            autoprefixer({
-                                                browsers: [
-                                                    '>1%',
-                                                    'last 4 versions',
-                                                    'Firefox ESR',
-                                                    'not ie < 9', // React doesn't support IE8 anyway
-                                                ],
-                                                flexbox: 'no-2009',
-                                            }),
-                                        ],
                                     },
+                                },
+                                {
+                                    loader: require.resolve('resolve-url-loader'),
+                                    options: {
+                                        sourceMap: true
+                                    }
                                 },
                                 {
                                     loader: 'sass-loader',
@@ -262,10 +250,18 @@ module.exports = {
                                 },
                             ],
                         },
-                        extractTextPluginOptions
+                        scssExtractTextPluginOptions
                     )
                 ),
             },
+            // "file" loader for svg
+            {
+                test: /\.svg$/,
+                loader: 'file-loader',
+                query: {
+                    name: 'static/media/[name].[hash:8].[ext]'
+                }
+            }
             // ** STOP ** Are you adding a new loader?
             // Remember to add the new extension(s) to the "file" loader exclusion list.
         ],
@@ -315,9 +311,9 @@ module.exports = {
             sourceMap: true,
         }),
         // Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
-        new ExtractTextPlugin({
-            filename: cssFilename,
-        }),
+        // Extract Stylesheets
+        extractCss,
+        extractScss,
         // Generate a manifest file which contains a mapping of all asset filenames
         // to their corresponding output file so that tools can pick it up without
         // having to parse `index.html`.

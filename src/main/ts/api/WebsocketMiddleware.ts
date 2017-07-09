@@ -68,5 +68,6 @@ const createWebsocketMiddleware = ((url: string): Middleware => {
         return undefined;
     }) as Middleware;
 });
+const websocketEndpoint = `ws://${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/events`;
 
-export default createWebsocketMiddleware('ws://localhost:3000/events');
+export default createWebsocketMiddleware(websocketEndpoint);

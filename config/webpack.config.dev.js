@@ -1,14 +1,11 @@
 'use strict';
 
-const autoprefixer = require('autoprefixer');
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
 const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
-const eslintFormatter = require('react-dev-utils/eslintFormatter');
-const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const getClientEnvironment = require('./env');
 const paths = require('./paths');
 
@@ -91,14 +88,14 @@ module.exports = {
             // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
             'react-native': 'react-native-web',
         },
-        plugins: [
+        /*plugins: [
             // Prevents users from importing files from outside of src/ (or node_modules/).
             // This often causes confusion because we only process files within src/ with babel.
             // To fix this, we prevent you from importing files out of src/ -- if you'd like to,
             // please link the files into your node_modules/ and let module-resolution kick in.
             // Make sure your source files are compiled, as they will not be processed in any way.
             new ModuleScopePlugin(paths.appSrc),
-        ],
+        ],*/
     },
     module: {
         strictExportPresence: true,
@@ -208,6 +205,7 @@ module.exports = {
                     {
                         loader: require.resolve('style-loader'),
                         options: {
+                            modules: true,
                             sourceMap: true,
                         }
                     },
@@ -225,25 +223,13 @@ module.exports = {
                     {
                         loader: require.resolve('postcss-loader'),
                         options: {
-                            ident: 'postcss', // https://webpack.js.org/guides/migrating/#complex-options
                             sourceMap: true,
-                            plugins: () => [
-                                require('postcss-flexbugs-fixes'),
-                                autoprefixer({
-                                    browsers: [
-                                        '>1%',
-                                        'last 4 versions',
-                                        'Firefox ESR',
-                                        'not ie < 9', // React doesn't support IE8 anyway
-                                    ],
-                                    flexbox: 'no-2009',
-                                }),
-                            ],
                         },
                     },
                     {
                         loader: require.resolve('resolve-url-loader'),
                         options: {
+                            modules: true,
                             sourceMap: true,
                             debug: true,
                         }
@@ -256,6 +242,7 @@ module.exports = {
                     {
                         loader: require.resolve('style-loader'),
                         options: {
+                            modules: true,
                             sourceMap: true,
                         }
                     },
@@ -274,20 +261,7 @@ module.exports = {
                     {
                         loader: require.resolve('postcss-loader'),
                         options: {
-                            ident: 'postcss', // https://webpack.js.org/guides/migrating/#complex-options
                             sourceMap: true,
-                            plugins: () => [
-                                require('postcss-flexbugs-fixes'),
-                                autoprefixer({
-                                    browsers: [
-                                        '>1%',
-                                        'last 4 versions',
-                                        'Firefox ESR',
-                                        'not ie < 9', // React doesn't support IE8 anyway
-                                    ],
-                                    flexbox: 'no-2009',
-                                }),
-                            ],
                         },
                     },
                     {

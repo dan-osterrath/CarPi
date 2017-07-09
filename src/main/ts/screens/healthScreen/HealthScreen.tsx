@@ -97,14 +97,14 @@ class HealthScreen extends React.Component<HealthScreenProps, {}> {
                                         <LinearProgress
                                             mode="determinate"
                                             min={0}
-                                            max={2}
+                                            max={4}
                                             value={systemLoad}
                                             color={HealthStatusUtils.systemLoadIsOk(systemLoad) ? undefined : '#d32f2f'}
                                         />
                                     </ListItem>
                                     <ListItem
                                         leftIcon={MemoryIcon}
-                                        secondaryText={`Speicher-Auslastung: ${Math.round(memFree / 1048576)}MB / ${Math.round(memTotal / 1048576)}MB`}
+                                        secondaryText={`Speicher-Auslastung: ${Math.round((memTotal - memFree) / 1048576)}MB / ${Math.round(memTotal / 1048576)}MB`}
                                         disabled={true}
                                         className={styles.healthElement}
                                     >
@@ -112,13 +112,13 @@ class HealthScreen extends React.Component<HealthScreenProps, {}> {
                                             mode="determinate"
                                             min={0}
                                             max={1}
-                                            value={memTotal > 0 ? memFree / memTotal : 0}
+                                            value={memTotal > 0 ? 1 - (memFree / memTotal) : 0}
                                             color={HealthStatusUtils.memUsageIsOk(memTotal, memFree) ? undefined : '#d32f2f'}
                                         />
                                     </ListItem>
                                     <ListItem
                                         leftIcon={<IconStorage />}
-                                        secondaryText={`SD-Karten-Auslastung: ${Math.round(discFree / 1073741824)}GB / ${Math.round(discTotal / 1073741824)}GB`}
+                                        secondaryText={`SD-Karten-Auslastung: ${Math.round((discTotal - discFree) / 1073741824)}GB / ${Math.round(discTotal / 1073741824)}GB`}
                                         disabled={true}
                                         className={styles.healthElement}
                                     >
@@ -126,7 +126,7 @@ class HealthScreen extends React.Component<HealthScreenProps, {}> {
                                             mode="determinate"
                                             min={0}
                                             max={1}
-                                            value={discTotal > 0 ? discFree / discTotal : 0}
+                                            value={discTotal > 0 ? 1 - (discFree / discTotal) : 0}
                                             color={HealthStatusUtils.discUsageIsOk(discTotal, discFree) ? undefined : '#d32f2f'}
                                         />
                                     </ListItem>
