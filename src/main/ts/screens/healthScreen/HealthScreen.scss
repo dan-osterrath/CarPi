@@ -1,5 +1,18 @@
 .healthScreen {
-  width: 100%;
-  position: fixed;
-  bottom: 0;
+
+  .healthPaper {
+    float: left;
+    margin: 20px;
+    width: 984px;
+    height: 504px;
+    > div {
+      height: 100%;
+    }
+
+    .healthElement {
+      :first-child {
+        height: 10px !important;
+      }
+    }
+  }
 }

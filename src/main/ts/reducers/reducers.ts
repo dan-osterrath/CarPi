@@ -8,16 +8,22 @@ import EventMessage from '../api/model/EventMessage';
 import GPSPositionChangeEvent, {EVENT_NAME as GPSPositionChangeEventName} from '../api/model/GPSPositionChangeEvent';
 import GPSMetaInfoChangeEvent, {EVENT_NAME as GPSMetaInfoChangeEventName} from '../api/model/GPSMetaInfoChangeEvent';
 import GPSTrackChangeEvent, {EVENT_NAME as GPSTrackChangeEventName} from '../api/model/GPSTrackChangeEvent';
+import HealthStatusChangeEvent, {EVENT_NAME as HealthStatusChangeEventName} from '../api/model/HealthStatusChangeEvent';
 import GPSMetaInfo from '../api/model/GPSMetaInfo';
+import HealthStatus from '../api/model/HealthStatus';
+import * as HealthStatusUtils from '../helpers/HeathStatusUtils';
 
 interface AppState extends Readonly<{}> {
     mapConfig?: MapConfiguration;
     gpsData?: GPSData;
+    healthStatus?: HealthStatus;
     websocketConnected: boolean;
+    healthIsOk: boolean;
 }
 
 const initialState: AppState = {
     websocketConnected: false,
+    healthIsOk: true,
 };
 
 const reducers = handleActions<AppState, {}>(
@@ -77,6 +83,22 @@ const reducers = handleActions<AppState, {}>(
                             track: e3.track,
                         }
                     };
+                case HealthStatusChangeEventName:
+                    const e4: HealthStatusChangeEvent = action.payload.event as HealthStatusChangeEvent;
+                    const healthStatus = e4.status;
+                    const healthIsOk = //
+                        HealthStatusUtils.cpuTemperatureIsOk(healthStatus.cpuTemperature) && //
+                        HealthStatusUtils.gpuTemperatureIsOk(healthStatus.gpuTemperature) && //
+                        HealthStatusUtils.cpuUsageIsOk(healthStatus.cpuUsage) && //
+                        HealthStatusUtils.cpuVoltageIsOk(healthStatus.cpuVoltage) && //
+                        HealthStatusUtils.discUsageIsOk(healthStatus.discTotal, healthStatus.discFree) && //
+                        HealthStatusUtils.memUsageIsOk(healthStatus.memTotal, healthStatus.memFree) && //
+                        HealthStatusUtils.systemLoadIsOk(healthStatus.systemLoad);
+                    return {
+                        ...state,
+                        healthStatus,
+                        healthIsOk,
+                    };
                 default:
                     console.log('Received unknown message type ' + action.payload.type);
                     return state;
@@ -88,6 +110,10 @@ const reducers = handleActions<AppState, {}>(
 
 function isWebSocketConnected(state: AppState): boolean {
     return state.websocketConnected;
+}
+
+function isHealthStatusOk(state: AppState): boolean {
+    return state.healthIsOk;
 }
 
 function getMapConfig(state: AppState): MapConfiguration|undefined {
@@ -106,14 +132,20 @@ function getCurrentGPSMetaInfo(state: AppState): GPSMetaInfo|undefined {
     return state.gpsData ? state.gpsData.meta : undefined;
 }
 
+function getCurrentHealthStatus(state: AppState): HealthStatus|undefined {
+    return state.healthStatus;
+}
+
 export {
     AppState,
 
     isWebSocketConnected,
+    isHealthStatusOk,
     getMapConfig,
     getCurrentGPSData,
     getCurrentGPSPosition,
     getCurrentGPSMetaInfo,
+    getCurrentHealthStatus,
 };
 
 export default reducers;

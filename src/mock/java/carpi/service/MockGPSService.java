@@ -1,5 +1,7 @@
 package carpi.service;
 
+import static carpi.service.Jitter.getJitter;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -56,12 +58,12 @@ public class MockGPSService implements GPSService {
 	private GPSMetaInfo lastMetaInfo;
 
 	/**
-	 * Lock object for handling {@link GPSdGPSService#lastPosition}.
+	 * Lock object for handling {@link MockGPSService#lastPosition}.
 	 */
 	private final Object LAST_POSITION_LOCK = new Object();
 
 	/**
-	 * Lock object for handling {@link GPSdGPSService#lastMetaInfo}.
+	 * Lock object for handling {@link MockGPSService#lastMetaInfo}.
 	 */
 	private final Object LAST_META_INFO_LOCK = new Object();
 
@@ -93,21 +95,21 @@ public class MockGPSService implements GPSService {
 		synchronized (LAST_POSITION_LOCK) {
 			if (lastPosition == null) {
 				lastPosition = new GPSPosition();
-				lastPosition.setLongitude(13.4247317 + getJitter(0.05));
-				lastPosition.setLatitude(52.5068441 + getJitter(0.05));
-				lastPosition.setAltitude(100 + getJitter(10));
+				lastPosition.setLongitude(getJitter(13.4247317, 0.05));
+				lastPosition.setLatitude(getJitter(52.5068441, 0.05));
+				lastPosition.setAltitude(getJitter(100, 10));
 				lastPosition.setSpeed(0.0);
 				lastPosition.setClimbRate(0.0);
 			} else {
-				lastPosition.setLongitude(lastPosition.getLongitude() + getJitter(0.00025));
-				lastPosition.setLatitude(lastPosition.getLatitude() + getJitter(0.00025));
-				lastPosition.setAltitude(Math.max(0, lastPosition.getAltitude() + getJitter(0.5)));
-				lastPosition.setSpeed(Math.max(0, lastPosition.getSpeed() + getJitter(2.0 / 3.6)));
-				lastPosition.setClimbRate(Math.max(0, lastPosition.getClimbRate() + getJitter(0.5 / 3.6)));
+				lastPosition.setLongitude(getJitter(lastPosition.getLongitude(), 0.00025));
+				lastPosition.setLatitude(getJitter(lastPosition.getLatitude(), 0.00025));
+				lastPosition.setAltitude(Math.max(0, getJitter(lastPosition.getAltitude(), 0.5)));
+				lastPosition.setSpeed(Math.max(0, getJitter(lastPosition.getSpeed(), 2.0 / 3.6)));
+				lastPosition.setClimbRate(Math.max(0, getJitter(lastPosition.getClimbRate(), 0.5 / 3.6)));
 			}
-			lastPosition.setLongitudeError(100 * Math.random());
-			lastPosition.setLatitudeError(100 * Math.random());
-			lastPosition.setAltitudeError(100 * Math.random());
+			lastPosition.setLongitudeError(20 * Math.random());
+			lastPosition.setLatitudeError(20 * Math.random());
+			lastPosition.setAltitudeError(80 * Math.random());
 			lastPosition.setSpeedError(5 * Math.random());
 			lastPosition.setClimbRateError(5 * Math.random());
 			lastPosition.setTimestamp(((double) System.currentTimeMillis()) / 1000);
@@ -130,17 +132,6 @@ public class MockGPSService implements GPSService {
 		}
 
 		gpsMetaInfoChangeEvent.fire(new GPSMetaInfoChangeEvent(lastMetaInfo));
-	}
-
-	/**
-	 * Returns some random jitter.
-	 * 
-	 * @param jitterSize
-	 *            jitter size
-	 * @return random jitter
-	 */
-	private double getJitter(double jitterSize) {
-		return Math.random() * jitterSize * 2 - jitterSize;
 	}
 
 	/**

@@ -10,7 +10,7 @@ import IconTablet from 'material-ui/svg-icons/hardware/tablet';
 import IconCar from 'material-ui/svg-icons/maps/directions-car';
 
 import GPSMetaInfo from '../../api/model/GPSMetaInfo';
-import {AppState, getCurrentGPSMetaInfo} from '../../reducers/reducers';
+import {AppState, getCurrentGPSMetaInfo, isHealthStatusOk} from '../../reducers/reducers';
 
 interface MainNavigationComponentProps {
     selectedTab: number;
@@ -22,6 +22,7 @@ interface ContainerDispatchProps {
 
 interface ContainerStateProps {
     gpsMetaInfo?: GPSMetaInfo;
+    healthStatusOk: boolean;
 }
 
 type ContainerOwnProps = MainNavigationComponentProps & ProviderProps;
@@ -39,9 +40,9 @@ class MainNavigation extends React.Component<MainNavigationProps, {}> {
                 <BottomNavigation selectedIndex={this.props.selectedTab}>
                     <BottomNavigationItem label="Dashboard" icon={<IconDashboard />} onClick={() => this.select(0)}/>
                     <BottomNavigationItem label="Karte" icon={<IconMap />} onClick={() => this.select(1)}/>
-                    <BottomNavigationItem label="GPS" icon={<IconLocationOn />} onClick={() => this.select(2)} className={(!this.props.gpsMetaInfo || !this.props.gpsMetaInfo.numSatellites) ? styles.noGPS : ''}/>
-                    <BottomNavigationItem label="Fahrzeug" icon={<IconCar />} onClick={() => this.select(3)}/>
-                    <BottomNavigationItem label="CarPi" icon={<IconTablet />} onClick={() => this.select(4)}/>
+                    <BottomNavigationItem label="GPS" icon={<IconLocationOn />} onClick={() => this.select(2)} className={(!this.props.gpsMetaInfo || !this.props.gpsMetaInfo.numSatellites) ? styles.noGPS : ''} />
+                    <BottomNavigationItem label="Fahrzeug" icon={<IconCar />} onClick={() => this.select(3)} />
+                    <BottomNavigationItem label="CarPi" icon={<IconTablet />} onClick={() => this.select(4)} className={this.props.healthStatusOk ? '' : styles.healthWarning} />
                 </BottomNavigation>
             </Paper>
         );
@@ -55,6 +56,7 @@ class MainNavigation extends React.Component<MainNavigationProps, {}> {
 const MainNavigation$$ = connect<ContainerStateProps, ContainerDispatchProps, ContainerOwnProps>(
     (state: AppState, ownProps: ContainerOwnProps): ContainerStateProps => ({
         gpsMetaInfo: getCurrentGPSMetaInfo(state),
+        healthStatusOk: isHealthStatusOk(state),
     }),
     (dispatch, ownProps: ContainerOwnProps): ContainerDispatchProps => ({})
 )(MainNavigation);

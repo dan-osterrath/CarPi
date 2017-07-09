@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.websocket.OnClose;
+import javax.websocket.OnError;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
@@ -122,6 +123,14 @@ public class EventEndpoint {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Handler when an communication error occurred.
+	 */
+	@OnError
+	public void onError(Session session, Throwable e) {
+		log.log(Level.INFO, "Error while communicating with client", e);
 	}
 
 }

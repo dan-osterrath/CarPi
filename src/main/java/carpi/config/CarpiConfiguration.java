@@ -61,6 +61,11 @@ public class CarpiConfiguration {
 	private static final String PROP_LOADAVG_PATH = "loadavg.path";
 
 	/**
+	 * Property key for the CPU temperature path.
+	 */
+	private static final String PROP_CPU_TEMP_PATH = "cputemp.path";
+
+	/**
 	 * Property key for the MBTiles files to use for the map.
 	 */
 	private static final String PROP_MBTILES_FILES = "mbtiles.files";
@@ -196,6 +201,15 @@ public class CarpiConfiguration {
 	}
 
 	/**
+	 * Returns the path to CPU temperature file.
+	 * 
+	 * @return CPU temperature path
+	 */
+	public String getCPUTemperaturePath() {
+		return properties.getProperty(PROP_CPU_TEMP_PATH, "/sys/class/thermal/thermal_zone0/temp");
+	}
+
+	/**
 	 * Returns the path to the mbtiles files. Multiple files will be separated by ','. 
 	 * 
 	 * @return mbtiles paths
@@ -210,7 +224,7 @@ public class CarpiConfiguration {
 	 * @return error threshold
 	 */
 	public double getLongitudeLatitudeErrorThreshold() {
-		return Double.parseDouble(properties.getProperty(PROP_ERROR_THRESHOLD_LONG_LAT, "15"));
+		return Double.parseDouble(properties.getProperty(PROP_ERROR_THRESHOLD_LONG_LAT, "100"));
 	}
 
 	/**
@@ -219,7 +233,7 @@ public class CarpiConfiguration {
 	 * @return error threshold
 	 */
 	public double getAltitudeErrorThreshold() {
-		return Double.parseDouble(properties.getProperty(PROP_ERROR_THRESHOLD_ALT, "50"));
+		return Double.parseDouble(properties.getProperty(PROP_ERROR_THRESHOLD_ALT, "100"));
 	}
 
 	/**
@@ -228,7 +242,7 @@ public class CarpiConfiguration {
 	 * @return movement threshold
 	 */
 	public double getMovementThreshold() {
-		return Double.parseDouble(properties.getProperty(PROP_MOVEMENT_THRESHOLD, "20"));
+		return Double.parseDouble(properties.getProperty(PROP_MOVEMENT_THRESHOLD, "10"));
 	}
 
 	/**

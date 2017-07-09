@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {connect, ProviderProps} from 'react-redux';
-import {Paper} from 'material-ui';
+import {Dialog} from 'material-ui';
 import IconError from 'material-ui/svg-icons/alert/error';
 
 import * as styles from './App.scss';
@@ -13,11 +13,14 @@ import GpsScreen from './screens/gpsScreen/GpsScreen';
 import Obd2Screen from './screens/obd2Screen/Obd2Screen';
 import HealthScreen from './screens/healthScreen/HealthScreen';
 import {EVENT_NAME as GPSMetaInfoChangeEventName} from './api/model/GPSMetaInfoChangeEvent';
+import {EVENT_NAME as HealthStatusChangeEventName} from './api/model/HealthStatusChangeEvent';
 
 interface ContainerDispatchProps {
     loadInitialData: () => void;
     subscribeGpsMeta: () => void;
     unsubscribeGpsMeta: () => void;
+    subscribeHealthStatus: () => void;
+    unsubscribeHealthStatus: () => void;
 }
 
 interface ContainerStateProps {
@@ -49,6 +52,7 @@ class App extends React.Component<AppProps, AppState> {
 
     componentWillUnmount() {
         this.props.unsubscribeGpsMeta();
+        this.props.unsubscribeHealthStatus();
     }
 
     componentWillReceiveProps(newProps: AppProps) {
@@ -58,6 +62,7 @@ class App extends React.Component<AppProps, AppState> {
                 this.connectInterval = undefined;
             }
             this.props.subscribeGpsMeta();
+            this.props.subscribeHealthStatus();
         } else if (!newProps.websocketConnected && this.props.websocketConnected) {
             if (this.connectInterval !== undefined) {
                 clearInterval(this.connectInterval);
@@ -67,18 +72,6 @@ class App extends React.Component<AppProps, AppState> {
     }
 
     render() {
-        if (!this.props.websocketConnected) {
-            return <div className={styles.app}>
-                <div className={styles.contentContainer}>
-                    <Paper zDepth={3} className={styles.noConnection}>
-                        <IconError className={styles.errorIcon}/>
-                        <div className={styles.errorMessage}>
-                            <h3>Keine Verbindung!</h3>
-                        </div>
-                    </Paper>
-                </div>
-            </div>;
-        }
         let screen;
         switch (this.state.selectedMainTab) {
             case 0:
@@ -102,6 +95,13 @@ class App extends React.Component<AppProps, AppState> {
 
         return (
             <div className={styles.app}>
+                <Dialog open={!this.props.websocketConnected} contentClassName={styles.noConnection}>
+                    <IconError className={styles.errorIcon}/>
+                    <div className={styles.errorMessage}>
+                        <h3>Keine Verbindung!</h3>
+                    </div>
+                </Dialog>
+
                 <div className={styles.contentContainer}>
                     {screen}
                 </div>
@@ -129,6 +129,8 @@ const App$$ = connect<ContainerStateProps, ContainerDispatchProps, ContainerOwnP
         loadInitialData: () => dispatch(loadInitialData()),
         subscribeGpsMeta: () => dispatch(subscribeEvent(GPSMetaInfoChangeEventName)),
         unsubscribeGpsMeta: () => dispatch(unsubscribeEvent(GPSMetaInfoChangeEventName)),
+        subscribeHealthStatus: () => dispatch(subscribeEvent(HealthStatusChangeEventName)),
+        unsubscribeHealthStatus: () => dispatch(unsubscribeEvent(HealthStatusChangeEventName)),
     })
 )(App);
 

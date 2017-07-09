@@ -12,6 +12,10 @@ public class HealthStatus {
 	 */
 	private double cpuTemperature;
 	/**
+	 * Current GPU temperature in °C.
+	 */
+	private double gpuTemperature;
+	/**
 	 * Current CPU voltage in V.
 	 */
 	private double cpuVoltage;
@@ -57,6 +61,25 @@ public class HealthStatus {
 	 */
 	public void setCpuTemperature(double cpuTemperature) {
 		this.cpuTemperature = cpuTemperature;
+	}
+
+	/**
+	 * Getter method for the field "gpuTemperature".
+	 *
+	 * @return the gpuTemperature
+	 */
+	public double getGpuTemperature() {
+		return gpuTemperature;
+	}
+
+	/**
+	 * Setter method for the field "gpuTemperature".
+	 *
+	 * @param gpuTemperature
+	 *            the gpuTemperature to set
+	 */
+	public void setGpuTemperature(double gpuTemperature) {
+		this.gpuTemperature = gpuTemperature;
 	}
 
 	/**

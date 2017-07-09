@@ -50,6 +50,7 @@ class Dashboard extends React.Component<DashboardProps, {}> {
         let altitude = 0;
         let time = moment();
         let gas = 0;
+        let reach = 0;
         if (this.props.gpsData) {
             const p = this.props.gpsData.position;
             if (p) {
@@ -86,9 +87,16 @@ class Dashboard extends React.Component<DashboardProps, {}> {
                                     <ListItem
                                         leftIcon={GasIcon}
                                         primaryText={`${Math.round(gas)}l`}
-                                        secondaryText="Tank"
+                                        secondaryText="Tankinhalt"
                                         disabled={true}
                                     />
+                                    <ListItem
+                                        insetChildren={true}
+                                        primaryText={`${Math.round(reach)}km`}
+                                        secondaryText="Reichweite"
+                                        disabled={true}
+                                    />
+                                    <Divider/>
                                     <ListItem
                                         leftIcon={<IconTerrain />}
                                         primaryText={`${Math.round(altitude)}m`}

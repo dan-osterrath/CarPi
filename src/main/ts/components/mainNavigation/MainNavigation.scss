@@ -3,7 +3,7 @@
   position: fixed;
   bottom: 0;
 
-  .noGPS {
+  .noGPS, .healthWarning {
     path {
       fill: #d32f2f !important;
     }
@@ -11,4 +11,5 @@
       color: #d32f2f !important;
     }
   }
+
 }
