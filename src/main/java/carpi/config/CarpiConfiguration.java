@@ -64,7 +64,7 @@ public class CarpiConfiguration {
 	 * Property key for the lifepo4wered-cli path.
 	 */
 	private static final String PROP_LIFEPO4WERED_CLI_PATH = "lifepo4wered-cli.path";
-	
+
 	/**
 	 * Property key for the CPU temperature path.
 	 */
@@ -99,6 +99,16 @@ public class CarpiConfiguration {
 	 * Property key for the target directory for tracking files.
 	 */
 	private static final String PROP_TRACKING_TARGET_DIR = "tracks.dir";
+
+	/**
+	 * Property key for the OBD2 WLAN dongle host name / IP.
+	 */
+	private static final String PROP_OBD2_WLAN_HOST = "obd2.wlan.host";
+
+	/**
+	 * Property key for the OBD2 WLAN dongle TCP port.
+	 */
+	private static final String PROP_OBD2_WLAN_PORT = "obd2.wlan.port";
 
 	/**
 	 * The configuration properties.
@@ -204,9 +214,10 @@ public class CarpiConfiguration {
 	public String getLoadavgPath() {
 		return properties.getProperty(PROP_LOADAVG_PATH, "/proc/loadavg");
 	}
-	
+
 	/**
 	 * Returns the path to lifepo4wered-cli file.
+	 * 
 	 * @return lifepo4wered-cli path
 	 */
 	public String getLifepo4weredCliPath() {
@@ -223,7 +234,7 @@ public class CarpiConfiguration {
 	}
 
 	/**
-	 * Returns the path to the mbtiles files. Multiple files will be separated by ','. 
+	 * Returns the path to the mbtiles files. Multiple files will be separated by ','.
 	 * 
 	 * @return mbtiles paths
 	 */
@@ -274,5 +285,23 @@ public class CarpiConfiguration {
 	 */
 	public String getTrackingTargetDirecory() {
 		return properties.getProperty(PROP_TRACKING_TARGET_DIR);
+	}
+
+	/**
+	 * Returns the host name of the OBD2 WLAN dongle.
+	 * 
+	 * @return host name
+	 */
+	public String getOBD2WLANHost() {
+		return properties.getProperty(PROP_OBD2_WLAN_HOST, "192.168.0.10");
+	}
+
+	/**
+	 * Returns the TCP port of the OBD2 WLAN dongle.
+	 * 
+	 * @return TCP port
+	 */
+	public Integer getOBD2WLANPort() {
+		return Integer.parseInt(properties.getProperty(PROP_OBD2_WLAN_PORT, "35000"), 10);
 	}
 }

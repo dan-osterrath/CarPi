@@ -3,7 +3,7 @@ package carpi.service;
 import carpi.model.HealthStatus;
 
 /**
- * Interface for the health service.
+ * Interface for reading current CarPi status.
  * 
  * @author osterrath
  *

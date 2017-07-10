@@ -77,12 +77,12 @@ public class GPSdGPSService implements GPSService {
 	private GPSMetaInfo lastMetaInfo;
 
 	/**
-	 * Lock object for handling {@link MockGPSService#lastPosition}.
+	 * Lock object for handling {@link GPSdGPSService#lastPosition}.
 	 */
 	private final Object LAST_POSITION_LOCK = new Object();
 
 	/**
-	 * Lock object for handling {@link MockGPSService#lastMetaInfo}.
+	 * Lock object for handling {@link GPSdGPSService#lastMetaInfo}.
 	 */
 	private final Object LAST_META_INFO_LOCK = new Object();
 
