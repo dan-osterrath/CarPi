@@ -61,6 +61,11 @@ public class CarpiConfiguration {
 	private static final String PROP_LOADAVG_PATH = "loadavg.path";
 
 	/**
+	 * Property key for the lifepo4wered-cli path.
+	 */
+	private static final String PROP_LIFEPO4WERED_CLI_PATH = "lifepo4wered-cli.path";
+	
+	/**
 	 * Property key for the CPU temperature path.
 	 */
 	private static final String PROP_CPU_TEMP_PATH = "cputemp.path";
@@ -198,6 +203,14 @@ public class CarpiConfiguration {
 	 */
 	public String getLoadavgPath() {
 		return properties.getProperty(PROP_LOADAVG_PATH, "/proc/loadavg");
+	}
+	
+	/**
+	 * Returns the path to lifepo4wered-cli file.
+	 * @return lifepo4wered-cli path
+	 */
+	public String getLifepo4weredCliPath() {
+		return properties.getProperty(PROP_LIFEPO4WERED_CLI_PATH, "/usr/local/bin/lifepo4wered-cli");
 	}
 
 	/**

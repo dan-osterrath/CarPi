@@ -70,6 +70,16 @@ public class RaspbianHealthService implements HealthService {
 	private ProcessBuilder vcgencmdCPUVoltagePB;
 
 	/**
+	 * Process builder for executing lifepo4wered-cli to read input voltage.
+	 */
+	private ProcessBuilder lifepo4weredCliInputVoltagePB;
+
+	/**
+	 * Process builder for executing lifepo4wered-cli to read battery voltage.
+	 */
+	private ProcessBuilder lifepo4weredCliBatteryVoltagePB;
+
+	/**
 	 * Process builder for executing free.
 	 */
 	private ProcessBuilder freePB;
@@ -88,7 +98,7 @@ public class RaspbianHealthService implements HealthService {
 	 * File for reading CPU temperature.
 	 */
 	private File cpuTemperatureFile;
-	
+
 	/**
 	 * Event when the health status has been changed.
 	 */
@@ -133,6 +143,8 @@ public class RaspbianHealthService implements HealthService {
 			vcgencmdCPUVoltagePB = new ProcessBuilder(config.getVcgencmdPath(), "measure_volts");
 			freePB = new ProcessBuilder(config.getFreePath(), "-b");
 			dfPB = new ProcessBuilder(config.getDfPath(), "-l", "-T", "-BK", "/");
+			lifepo4weredCliInputVoltagePB = new ProcessBuilder(config.getLifepo4weredCliPath(), "get", "vin");
+			lifepo4weredCliBatteryVoltagePB = new ProcessBuilder(config.getLifepo4weredCliPath(), "get", "vbat");
 			loadAvgFile = new File(config.getLoadavgPath());
 			cpuTemperatureFile = new File(config.getCPUTemperaturePath());
 		}
@@ -141,9 +153,12 @@ public class RaspbianHealthService implements HealthService {
 		executorService.scheduleAtFixedRate(() -> readCPUStatus(), 0, 60, TimeUnit.SECONDS);
 		executorService.scheduleAtFixedRate(() -> readMemoryUsage(), 0, 60, TimeUnit.SECONDS);
 		executorService.scheduleAtFixedRate(() -> readDiscUsage(), 0, 10, TimeUnit.MINUTES);
+		executorService.scheduleAtFixedRate(() -> readLifepo4weredStatus(), 5, 10, TimeUnit.SECONDS);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see carpi.service.HealthService#getHealthStatus()
 	 */
 	@Override
@@ -261,6 +276,24 @@ public class RaspbianHealthService implements HealthService {
 	}
 
 	/**
+	 * Reads the status from the LiFePO4wered module and updates the health status.
+	 */
+	private void readLifepo4weredStatus() {
+		log.fine("Reading LiFePO4wered status");
+		double batteryVoltage = readLifepo4weredBatteryVoltage();
+		double inputVoltage = readLifepo4weredInputVoltage();
+
+		boolean changed = false;
+		synchronized (currentHealthStatus) {
+			// TODO
+		}
+
+		if (changed) {
+			dispatchChangeEvent(currentHealthStatus);
+		}
+	}
+
+	/**
 	 * Reads the system load from /proc/loadavg.
 	 * 
 	 * @return system load
@@ -326,7 +359,7 @@ public class RaspbianHealthService implements HealthService {
 		// on other OS we fake
 		return 50.0;
 	}
-	
+
 	/**
 	 * Reads the CPU usage from mpstat process.
 	 * 
@@ -514,6 +547,102 @@ public class RaspbianHealthService implements HealthService {
 
 		// on other OS we fake
 		return new long[] { 10 * 1024 * 1024, 3 * 1024 * 1024 };
+	}
+
+	/**
+	 * Reads the battery voltage from LiFePO4wered.
+	 * 
+	 * @return battery voltage
+	 */
+	private double readLifepo4weredBatteryVoltage() {
+		if (isLinux) {
+			// get voltage from lifepo4wered-cli
+			Process df = null;
+			BufferedReader br = null;
+			double ret = -1;
+			try {
+				df = lifepo4weredCliBatteryVoltagePB.start();
+
+				// read stdout
+				br = new BufferedReader(new InputStreamReader(df.getInputStream()));
+				String line = null;
+				while ((line = br.readLine()) != null) {
+					// TODO parse lifepo4wered-cli output
+					if (StringUtils.contains(line, "=")) {
+						String[] parts = line.split("=", 2);
+						Matcher matcher = VCGENCMD_VALUE_MATCHER.matcher(parts[1]);
+						if (matcher.matches()) {
+							ret = NumberFormat.getInstance(Locale.US).parse(matcher.group(1)).doubleValue();
+						}
+					}
+				}
+			} catch (IOException e) {
+				log.log(Level.WARNING, "Could not read battery voltage", e);
+			} catch (ParseException e) {
+				log.log(Level.WARNING, "Could not parse battery voltage", e);
+			} finally {
+				if (df != null) {
+					try {
+						df.waitFor();
+					} catch (InterruptedException e) {
+					}
+				}
+				closeReader(br);
+			}
+
+			return ret;
+		}
+
+		// on other OS we fake
+		return 5.0;
+	}
+
+	/**
+	 * Reads the input voltage from LiFePO4wered.
+	 * 
+	 * @return input voltage
+	 */
+	private double readLifepo4weredInputVoltage() {
+		if (isLinux) {
+			// get voltage from lifepo4wered-cli
+			Process df = null;
+			BufferedReader br = null;
+			double ret = -1;
+			try {
+				df = lifepo4weredCliBatteryVoltagePB.start();
+
+				// read stdout
+				br = new BufferedReader(new InputStreamReader(df.getInputStream()));
+				String line = null;
+				while ((line = br.readLine()) != null) {
+					// TODO parse lifepo4wered-cli output
+					if (StringUtils.contains(line, "=")) {
+						String[] parts = line.split("=", 2);
+						Matcher matcher = VCGENCMD_VALUE_MATCHER.matcher(parts[1]);
+						if (matcher.matches()) {
+							ret = NumberFormat.getInstance(Locale.US).parse(matcher.group(1)).doubleValue();
+						}
+					}
+				}
+			} catch (IOException e) {
+				log.log(Level.WARNING, "Could not read input voltage", e);
+			} catch (ParseException e) {
+				log.log(Level.WARNING, "Could not parse input voltage", e);
+			} finally {
+				if (df != null) {
+					try {
+						df.waitFor();
+					} catch (InterruptedException e) {
+					}
+				}
+				closeReader(br);
+			}
+
+			return ret;
+		}
+
+		// on other OS we fake
+		return 5.0;
 	}
 
 	/**
