@@ -609,7 +609,7 @@ public class RaspbianHealthService implements HealthService {
 			BufferedReader br = null;
 			double ret = -1;
 			try {
-				df = lifepo4weredCliBatteryVoltagePB.start();
+				df = lifepo4weredCliInputVoltagePB.start();
 
 				// read stdout
 				br = new BufferedReader(new InputStreamReader(df.getInputStream()));
