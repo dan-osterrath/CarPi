@@ -82,6 +82,8 @@ public class MockHealthService implements HealthService {
 			currentHealthStatus.setDiscFree((long) getJitter(currentHealthStatus.getDiscTotal() * 0.8, currentHealthStatus.getDiscTotal() * 0.2));
 			currentHealthStatus.setMemFree((long) getJitter(currentHealthStatus.getMemTotal() * 0.8, currentHealthStatus.getMemTotal() * 0.2));
 			currentHealthStatus.setSystemLoad(Math.min(Math.max(0, getJitter(currentHealthStatus.getSystemLoad(), 0.2)), 1));
+			currentHealthStatus.setBatteryVoltage(getJitter(5, 1));
+			currentHealthStatus.setInputVoltage(getJitter(5, 1));
 		}
 
 		healthStatusChangeEvent.fire(new HealthStatusChangeEvent(currentHealthStatus));

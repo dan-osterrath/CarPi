@@ -43,6 +43,14 @@ public class HealthStatus {
 	 * Total memory in byte.
 	 */
 	private long memTotal;
+	/**
+	 * Current battery voltage.
+	 */
+	private double batteryVoltage;
+	/**
+	 * Current input voltage.
+	 */
+	private double inputVoltage;
 
 	/**
 	 * Getter method for the field "cpuTemperature".
@@ -214,4 +222,43 @@ public class HealthStatus {
 	public void setMemTotal(long memTotal) {
 		this.memTotal = memTotal;
 	}
+
+	/**
+	 * Getter method for the field "batteryVoltage".
+	 *
+	 * @return the batteryVoltage
+	 */
+	public double getBatteryVoltage() {
+		return batteryVoltage;
+	}
+
+	/**
+	 * Setter method for the field "batteryVoltage".
+	 *
+	 * @param batteryVoltage
+	 *            the batteryVoltage to set
+	 */
+	public void setBatteryVoltage(double batteryVoltage) {
+		this.batteryVoltage = batteryVoltage;
+	}
+
+	/**
+	 * Getter method for the field "inputVoltage".
+	 *
+	 * @return the inputVoltage
+	 */
+	public double getInputVoltage() {
+		return inputVoltage;
+	}
+
+	/**
+	 * Setter method for the field "inputVoltage".
+	 *
+	 * @param inputVoltage
+	 *            the inputVoltage to set
+	 */
+	public void setInputVoltage(double inputVoltage) {
+		this.inputVoltage = inputVoltage;
+	}
+
 }

@@ -8,6 +8,8 @@ interface HealthStatus {
     discTotal: number;
     memFree: number;
     memTotal: number;
+    batteryVoltage: number;
+    inputVoltage: number;
 }
 
 export default HealthStatus;

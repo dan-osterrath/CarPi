@@ -5,7 +5,7 @@ import carpi.model.GPSPosition;
 
 /**
  * Interface for the services reading curent GPS status and position.
- * 
+ *
  * @author osterrath
  *
  */

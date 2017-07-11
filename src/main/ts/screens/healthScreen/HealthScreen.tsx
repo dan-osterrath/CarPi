@@ -2,6 +2,7 @@ import * as React from 'react';
 import {connect, ProviderProps} from 'react-redux';
 import {Paper, Card, CardMedia, List, ListItem, LinearProgress} from 'material-ui';
 import IconPower from 'material-ui/svg-icons/notification/power';
+import IconBattery from 'material-ui/svg-icons/device/battery-charging-full';
 import IconStorage from 'material-ui/svg-icons/device/sd-storage';
 
 import * as styles from './HealthScreen.scss';
@@ -12,6 +13,7 @@ import TemperatureIcon from '../../icons/TemperatureIcon';
 import CPUIcon from '../../icons/CPUIcon';
 import RaspPiIcon from '../../icons/RaspPiIcon';
 import MemoryIcon from '../../icons/MemoryIcon';
+import VoltageIcon from '../../icons/VoltageIcon';
 
 interface ContainerDispatchProps {
 }
@@ -37,6 +39,8 @@ class HealthScreen extends React.Component<HealthScreenProps, {}> {
             memFree = 0,
             memTotal = 0,
             systemLoad = 0,
+            batteryVoltage = 0,
+            inputVoltage = 0,
         } = {...this.props.healthStatus};
 
         return (
@@ -132,6 +136,34 @@ class HealthScreen extends React.Component<HealthScreenProps, {}> {
                                     </ListItem>
                                     <ListItem
                                         leftIcon={<IconPower />}
+                                        secondaryText={`Eingangsspannung-Spannung: ${Math.round(inputVoltage * 100) / 100}V`}
+                                        disabled={true}
+                                        className={styles.healthElement}
+                                    >
+                                        <LinearProgress
+                                            mode="determinate"
+                                            min={1}
+                                            max={7}
+                                            value={inputVoltage}
+                                            color={HealthStatusUtils.inputVoltageIsOk(inputVoltage) ? undefined : '#d32f2f'}
+                                        />
+                                    </ListItem>
+                                    <ListItem
+                                        leftIcon={<IconBattery />}
+                                        secondaryText={`Batterie-Spannung: ${Math.round(batteryVoltage * 100) / 100}V`}
+                                        disabled={true}
+                                        className={styles.healthElement}
+                                    >
+                                        <LinearProgress
+                                            mode="determinate"
+                                            min={1}
+                                            max={7}
+                                            value={batteryVoltage}
+                                            color={HealthStatusUtils.batteryVoltageIsOk(batteryVoltage) ? undefined : '#d32f2f'}
+                                        />
+                                    </ListItem>
+                                    <ListItem
+                                        leftIcon={VoltageIcon}
                                         secondaryText={`CPU-Spannung: ${Math.round(cpuVoltage * 100) / 100}V`}
                                         disabled={true}
                                         className={styles.healthElement}

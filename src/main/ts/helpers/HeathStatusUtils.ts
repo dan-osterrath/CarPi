@@ -5,6 +5,8 @@ const memUsageIsOk = (memTotal: number, memFree: number) => memTotal > 0 && memF
 const discUsageIsOk = (discTotal: number, discFree: number) => discTotal > 0 && discFree / discTotal > 0.1;
 const cpuVoltageIsOk = (cpuVoltage: number) => cpuVoltage <= 0 || (cpuVoltage > 1.15 && cpuVoltage < 1.3);
 const cpuUsageIsOk = (cpuUsage: number) => cpuUsage < 95;
+const batteryVoltageIsOk = (batteryVoltage: number) => batteryVoltage <= 0 || (batteryVoltage >= 5);
+const inputVoltageIsOk = (inputVoltage: number) => inputVoltage <= 0 || (inputVoltage >= 5 && inputVoltage < 6);
 
 export {
     cpuTemperatureIsOk,
@@ -14,4 +16,6 @@ export {
     discUsageIsOk,
     cpuVoltageIsOk,
     cpuUsageIsOk,
+    batteryVoltageIsOk,
+    inputVoltageIsOk,
 };

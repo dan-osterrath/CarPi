@@ -10,8 +10,12 @@
     }
 
     .healthElement {
-      :first-child {
-        height: 10px !important;
+      padding-top: 16px !important;
+      padding-bottom: 14px !important;
+
+      svg {
+        margin-top: 8px !important;
+        top: 8px !important;
       }
     }
   }

@@ -33,7 +33,7 @@ import carpi.threading.HealthMonitor;
 
 /**
  * Service for reading host health status.
- * 
+ *
  * @author osterrath
  *
  */
@@ -158,7 +158,7 @@ public class RaspbianHealthService implements HealthService {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see carpi.service.HealthService#getHealthStatus()
 	 */
 	@Override
@@ -285,7 +285,14 @@ public class RaspbianHealthService implements HealthService {
 
 		boolean changed = false;
 		synchronized (currentHealthStatus) {
-			// TODO
+			if (!nearlyEqual(currentHealthStatus.getBatteryVoltage(), batteryVoltage)) {
+				currentHealthStatus.setBatteryVoltage(batteryVoltage);
+				changed = true;
+			}
+			if (!nearlyEqual(currentHealthStatus.getInputVoltage(), inputVoltage)) {
+				currentHealthStatus.setInputVoltage(inputVoltage);
+				changed = true;
+			}
 		}
 
 		if (changed) {
@@ -551,7 +558,7 @@ public class RaspbianHealthService implements HealthService {
 
 	/**
 	 * Reads the battery voltage from LiFePO4wered.
-	 * 
+	 *
 	 * @return battery voltage
 	 */
 	private double readLifepo4weredBatteryVoltage() {
@@ -563,22 +570,15 @@ public class RaspbianHealthService implements HealthService {
 			try {
 				df = lifepo4weredCliBatteryVoltagePB.start();
 
-				// read stdout
+				// read 1st line
 				br = new BufferedReader(new InputStreamReader(df.getInputStream()));
-				String line = null;
-				while ((line = br.readLine()) != null) {
-					// TODO parse lifepo4wered-cli output
-					if (StringUtils.contains(line, "=")) {
-						String[] parts = line.split("=", 2);
-						Matcher matcher = VCGENCMD_VALUE_MATCHER.matcher(parts[1]);
-						if (matcher.matches()) {
-							ret = NumberFormat.getInstance(Locale.US).parse(matcher.group(1)).doubleValue();
-						}
-					}
-				}
+				String line = StringUtils.trimToEmpty(br.readLine());
+
+				// parse
+				ret = ((double)Long.parseLong(line, 10)) / 1000;
 			} catch (IOException e) {
 				log.log(Level.WARNING, "Could not read battery voltage", e);
-			} catch (ParseException e) {
+			} catch (NumberFormatException e) {
 				log.log(Level.WARNING, "Could not parse battery voltage", e);
 			} finally {
 				if (df != null) {
@@ -599,7 +599,7 @@ public class RaspbianHealthService implements HealthService {
 
 	/**
 	 * Reads the input voltage from LiFePO4wered.
-	 * 
+	 *
 	 * @return input voltage
 	 */
 	private double readLifepo4weredInputVoltage() {
@@ -611,22 +611,15 @@ public class RaspbianHealthService implements HealthService {
 			try {
 				df = lifepo4weredCliInputVoltagePB.start();
 
-				// read stdout
+				// read 1st line
 				br = new BufferedReader(new InputStreamReader(df.getInputStream()));
-				String line = null;
-				while ((line = br.readLine()) != null) {
-					// TODO parse lifepo4wered-cli output
-					if (StringUtils.contains(line, "=")) {
-						String[] parts = line.split("=", 2);
-						Matcher matcher = VCGENCMD_VALUE_MATCHER.matcher(parts[1]);
-						if (matcher.matches()) {
-							ret = NumberFormat.getInstance(Locale.US).parse(matcher.group(1)).doubleValue();
-						}
-					}
-				}
+				String line = StringUtils.trimToEmpty(br.readLine());
+
+				// parse
+				ret = ((double)Long.parseLong(line, 10)) / 1000;
 			} catch (IOException e) {
 				log.log(Level.WARNING, "Could not read input voltage", e);
-			} catch (ParseException e) {
+			} catch (NumberFormatException e) {
 				log.log(Level.WARNING, "Could not parse input voltage", e);
 			} finally {
 				if (df != null) {

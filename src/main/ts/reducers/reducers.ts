@@ -93,7 +93,9 @@ const reducers = handleActions<AppState, {}>(
                         HealthStatusUtils.cpuVoltageIsOk(healthStatus.cpuVoltage) && //
                         HealthStatusUtils.discUsageIsOk(healthStatus.discTotal, healthStatus.discFree) && //
                         HealthStatusUtils.memUsageIsOk(healthStatus.memTotal, healthStatus.memFree) && //
-                        HealthStatusUtils.systemLoadIsOk(healthStatus.systemLoad);
+                        HealthStatusUtils.systemLoadIsOk(healthStatus.systemLoad) && //
+                        HealthStatusUtils.batteryVoltageIsOk(healthStatus.batteryVoltage) && //
+                        HealthStatusUtils.inputVoltageIsOk(healthStatus.inputVoltage);
                     return {
                         ...state,
                         healthStatus,
