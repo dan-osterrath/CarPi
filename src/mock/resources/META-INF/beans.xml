@@ -3,7 +3,7 @@
 	version="1.2" bean-discovery-mode="annotated">
 
 	<alternatives>
-		<class>carpi.service.MockGPSService</class>
-		<class>carpi.service.MockHealthService</class>
+		<class>net.packsam.carpi.service.MockGPSService</class>
+		<class>net.packsam.carpi.service.MockHealthService</class>
 	</alternatives>
 </beans>
