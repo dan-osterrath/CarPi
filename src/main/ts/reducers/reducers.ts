@@ -38,6 +38,29 @@ const reducers = handleActions<AppState, {}>(
             };
         },
 
+        [Actions.REQUEST_GPS_DATA]: (state: AppState, action: Action<GPSData>) => {
+            if (action.error || !action.payload) {
+                return state;
+            }
+            return {
+                ...state,
+                gpsData: action.payload,
+            };
+        },
+
+        [Actions.REQUEST_GPS_POSITION]: (state: AppState, action: Action<GPSPosition>) => {
+            if (action.error || !action.payload) {
+                return state;
+            }
+            return {
+                ...state,
+                gpsData: {
+                    ...state.gpsData,
+                    position: action.payload,
+                }
+            };
+        },
+
         [Actions.WEBSOCKET_CONNECTED]: (state: AppState, action: Action<{}>) => {
             return {
                 ...state,

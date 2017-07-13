@@ -13,11 +13,12 @@ import Map from '../../components/map/Map';
 
 import GPSData from '../../api/model/GPSData';
 import {AppState, getCurrentGPSData} from '../../reducers/reducers';
-import {subscribeEvent, unsubscribeEvent} from '../../actions/actions';
+import {loadGpsData, subscribeEvent, unsubscribeEvent} from '../../actions/actions';
 import {EVENT_NAME as GPSPositionChangeEventName} from '../../api/model/GPSPositionChangeEvent';
 import {EVENT_NAME as GPSTrackChangeEventName} from '../../api/model/GPSTrackChangeEvent';
 
 interface ContainerDispatchProps {
+    loadGpsData: () => void;
     subscribeGpsPosition: () => void;
     unsubscribeGpsPosition: () => void;
     subscribeGpsTrack: () => void;
@@ -35,6 +36,7 @@ type DashboardProps = ContainerOwnProps & ContainerStateProps & ContainerDispatc
 class Dashboard extends React.Component<DashboardProps, {}> {
 
     componentDidMount() {
+        this.props.loadGpsData();
         this.props.subscribeGpsPosition();
         this.props.subscribeGpsTrack();
     }
@@ -132,6 +134,7 @@ const Dashboard$$ = connect<ContainerStateProps, ContainerDispatchProps, Contain
         gpsData: getCurrentGPSData(state),
     }),
     (dispatch, ownProps: ContainerOwnProps): ContainerDispatchProps => ({
+        loadGpsData: () => dispatch(loadGpsData()),
         subscribeGpsPosition: () => dispatch(subscribeEvent(GPSPositionChangeEventName)),
         unsubscribeGpsPosition: () => dispatch(unsubscribeEvent(GPSPositionChangeEventName)),
         subscribeGpsTrack: () => dispatch(subscribeEvent(GPSTrackChangeEventName)),

@@ -13,9 +13,9 @@
   }
 
   .leaflet-marker-icon {
-    background-color: #00bcd4;
+    background-color: #00bcd4 !important;
     mask-image: url('room_48px.svg');
-    border-color: transparent;
+    border-color: transparent !important;
     width: 48px !important;
     height: 48px !important;
   }
