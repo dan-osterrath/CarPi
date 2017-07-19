@@ -13,8 +13,18 @@
   }
 
   .leaflet-marker-icon {
+    background-color: #757575 !important;
+    mask-image: url('room_48px.svg');
+    mask-size: 24px 24px;
+    border-color: transparent !important;
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .leaflet-div-icon {
     background-color: #00bcd4 !important;
     mask-image: url('room_48px.svg');
+    mask-size: 48px 48px;
     border-color: transparent !important;
     width: 48px !important;
     height: 48px !important;

@@ -157,7 +157,7 @@ class Map extends React.Component<MapProps, {}> {
 
             const nextGeoJson = nextProps.geoJson;
             if (this.props.geoJson === undefined && nextGeoJson !== undefined) {
-                this.geoJson = L.geoJSON(this.props.geoJson).addTo(this.map);
+                this.geoJson = this.createGeoJsonLayer();
             } else if (this.props.geoJson !== undefined && nextGeoJson === undefined) {
                 if (this.geoJson) {
                     this.map.removeLayer(this.geoJson);
@@ -167,7 +167,7 @@ class Map extends React.Component<MapProps, {}> {
                 if (this.geoJson) {
                     this.map.removeLayer(this.geoJson);
                 }
-                this.geoJson = L.geoJSON(this.props.geoJson).addTo(this.map);
+                this.geoJson = this.createGeoJsonLayer();
             }
         }
     }
@@ -209,8 +209,8 @@ class Map extends React.Component<MapProps, {}> {
                 this.scale = L.control.scale().addTo(this.map);
             }
 
-            if (this.props.mapConfig && this.props.mapConfig.withGeoJson && this.props.geoJson) {
-                this.geoJson = L.geoJSON(this.props.geoJson).addTo(this.map);
+            if (this.props.geoJson) {
+                this.geoJson = this.createGeoJsonLayer();
             }
 
             if (!this.props.disableZoom) {
@@ -428,7 +428,7 @@ class Map extends React.Component<MapProps, {}> {
 
         const pathOptions: L.PolylineOptions = {
             interactive: false,
-            color: '#757575',
+            color: '#00bcd4',
             opacity: 0.8,
         };
         this.path = L.polyline([], pathOptions).addTo(this.map);
@@ -438,6 +438,60 @@ class Map extends React.Component<MapProps, {}> {
         const latLng = new L.LatLng(e.latitude, e.longitude, e.altitude);
         if (this.path) {
             this.path.addLatLng(latLng);
+        }
+    };
+
+    private createGeoJsonLayer(): L.GeoJSON {
+        return L.geoJSON(
+            this.props.geoJson,
+            {
+                style: this.getGeoJsonStyle,
+                pointToLayer: this.getGeoJsonPointLayer,
+                onEachFeature: this.handleGeoJsonFeature,
+            }
+        ).addTo(this.map);
+    }
+
+    private getGeoJsonStyle = (feature?: GeoJSONFeature<GeoJSONGeometryObject>): L.PathOptions => {
+        return {
+            color: '#757575',
+            opacity: 0.8,
+            interactive: (feature && feature.geometry.type === 'Point'),
+        };
+    };
+
+    private getGeoJsonPointLayer = (geoJsonPoint: GeoJSONFeature<GeoJSONPoint>, latlng: L.LatLng): L.Layer => {
+        /* tslint:disable-next-line:no-string-literal */
+        const isClickable = geoJsonPoint.properties && (geoJsonPoint.properties['name'] || geoJsonPoint.properties['Name']) && geoJsonPoint.properties['description'];
+        return L.circleMarker(latlng, {
+            radius: isClickable ? 20 : 7,
+            fillColor: '#757575',
+            color: '#000',
+            weight: isClickable ? 1 : 0,
+            opacity: isClickable ? 0.8 : 0.3,
+            fillOpacity: isClickable ? 0.5 : 0.3,
+            interactive: isClickable,
+        });
+    };
+
+    private handleGeoJsonFeature = (feature: GeoJSONFeature<GeoJSONGeometryObject>, layer: L.Layer): void => {
+        if (feature.geometry.type === 'Point' && feature.properties) {
+            let name = null;
+            let description = null;
+            /* tslint:disable:no-string-literal */
+            if (feature.properties.hasOwnProperty('name')) {
+                name = feature.properties['name'];
+            } else if (feature.properties.hasOwnProperty('Name')) {
+                name = feature.properties['Name'];
+            }
+            if (feature.properties.hasOwnProperty('description')) {
+                description = feature.properties['description'];
+            }
+            /* tslint:enable:no-string-literal */
+
+            if (name && description) {
+                layer.bindPopup(`<h1>${name}</h1><p>${description}</p>`);
+            }
         }
     }
 }
