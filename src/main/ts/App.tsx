@@ -5,7 +5,8 @@ import IconError from 'material-ui/svg-icons/alert/error';
 
 import * as styles from './App.scss';
 import {loadInitialData, subscribeEvent, unsubscribeEvent} from './actions/actions';
-import {AppState as GlobalAppState, isWebSocketConnected} from './reducers/reducers';
+import {AppState as GlobalAppState, getMapConfig, isWebSocketConnected} from './reducers/reducers';
+import MapConfiguration from './api/model/MapConfiguration';
 import MainNavigation from './components/mainNavigation/MainNavigation';
 import Dashboard from './screens/dashboard/Dashboard';
 import MapScreen from './screens/mapScreen/MapScreen';
@@ -25,6 +26,7 @@ interface ContainerDispatchProps {
 
 interface ContainerStateProps {
     websocketConnected: boolean;
+    mapConfig?: MapConfiguration;
 }
 
 type ContainerOwnProps = ProviderProps;
@@ -73,29 +75,33 @@ class App extends React.Component<AppProps, AppState> {
 
     render() {
         let screen;
-        switch (this.state.selectedMainTab) {
-            case 0:
-                screen = <Dashboard />;
-                break;
-            case 1:
-                screen = <MapScreen />;
-                break;
-            case 2:
-                screen = <GpsScreen />;
-                break;
-            case 3:
-                screen = <Obd2Screen />;
-                break;
-            case 4:
-                screen = <HealthScreen />;
-                break;
-            default:
-                screen = null;
+        if (this.props.websocketConnected && this.props.mapConfig) {
+            switch (this.state.selectedMainTab) {
+                case 0:
+                    screen = <Dashboard />;
+                    break;
+                case 1:
+                    screen = <MapScreen />;
+                    break;
+                case 2:
+                    screen = <GpsScreen />;
+                    break;
+                case 3:
+                    screen = <Obd2Screen />;
+                    break;
+                case 4:
+                    screen = <HealthScreen />;
+                    break;
+                default:
+                    screen = null;
+            }
+        } else {
+            screen = null;
         }
 
         return (
             <div className={styles.app}>
-                <Dialog open={!this.props.websocketConnected} contentClassName={styles.noConnection}>
+                <Dialog open={!this.props.websocketConnected || this.props.mapConfig === undefined} contentClassName={styles.noConnection}>
                     <IconError className={styles.errorIcon}/>
                     <div className={styles.errorMessage}>
                         <h3>Keine Verbindung!</h3>
@@ -124,6 +130,7 @@ class App extends React.Component<AppProps, AppState> {
 const App$$ = connect<ContainerStateProps, ContainerDispatchProps, ContainerOwnProps>(
     (state: GlobalAppState, ownProps: ContainerOwnProps): ContainerStateProps => ({
         websocketConnected: isWebSocketConnected(state),
+        mapConfig: getMapConfig(state),
     }),
     (dispatch, ownProps: ContainerOwnProps): ContainerDispatchProps => ({
         loadInitialData: () => dispatch(loadInitialData()),

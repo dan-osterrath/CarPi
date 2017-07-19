@@ -23,6 +23,11 @@ public class MapConfiguration {
 	private TilesType type;
 
 	/**
+	 * Flag if we have a GeoJson file.
+	 */
+	private boolean withGeoJson;
+
+	/**
 	 * Getter method for the field "minZoom".
 	 *
 	 * @return the minZoom
@@ -80,12 +85,35 @@ public class MapConfiguration {
 	}
 
 	/**
+	 * Getter method for the field "withGeoJson".
+	 *
+	 * @return the withGeoJson
+	 */
+	public boolean isWithGeoJson() {
+		return withGeoJson;
+	}
+
+	/**
+	 * Setter method for the field "withGeoJson".
+	 *
+	 * @param withGeoJson
+	 *            the withGeoJson to set
+	 */
+	public void setWithGeoJson(boolean withGeoJson) {
+		this.withGeoJson = withGeoJson;
+	}
+
+	/**
 	 * Type of the map tiles.
 	 * 
 	 * @author osterrath
 	 *
 	 */
 	public static enum TilesType {
+		/**
+		 * Tiles are jpeg images.
+		 */
+		JPEG,
 		/**
 		 * Tiles are png images.
 		 */

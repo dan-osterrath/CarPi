@@ -12,7 +12,7 @@ import GasIcon from '../../icons/GasIcon';
 import Map from '../../components/map/Map';
 
 import GPSData from '../../api/model/GPSData';
-import {AppState, getCurrentGPSData} from '../../reducers/reducers';
+import {AppState, getCurrentGPSData, getGeoJson} from '../../reducers/reducers';
 import {loadGpsData, subscribeEvent, unsubscribeEvent} from '../../actions/actions';
 import {EVENT_NAME as GPSPositionChangeEventName} from '../../api/model/GPSPositionChangeEvent';
 import {EVENT_NAME as GPSTrackChangeEventName} from '../../api/model/GPSTrackChangeEvent';
@@ -27,6 +27,7 @@ interface ContainerDispatchProps {
 
 interface ContainerStateProps {
     gpsData?: GPSData;
+    geoJson?: GeoJSONGeoJsonObject;
 }
 
 type ContainerOwnProps = ProviderProps;
@@ -121,6 +122,7 @@ class Dashboard extends React.Component<DashboardProps, {}> {
                     <Map
                         position={this.props.gpsData ? this.props.gpsData.position : undefined}
                         track={this.props.gpsData ? this.props.gpsData.track : undefined}
+                        geoJson={this.props.geoJson}
                         showScale={true}
                     />
                 </Paper>
@@ -132,6 +134,7 @@ class Dashboard extends React.Component<DashboardProps, {}> {
 const Dashboard$$ = connect<ContainerStateProps, ContainerDispatchProps, ContainerOwnProps>(
     (state: AppState, ownProps: ContainerOwnProps): ContainerStateProps => ({
         gpsData: getCurrentGPSData(state),
+        geoJson: getGeoJson(state),
     }),
     (dispatch, ownProps: ContainerOwnProps): ContainerDispatchProps => ({
         loadGpsData: () => dispatch(loadGpsData()),

@@ -19,6 +19,7 @@ interface MapComponentProps {
     disableZoom?: boolean;
     position?: GPSPosition;
     track?: GPSTrack;
+    geoJson?: GeoJSONGeoJsonObject;
     showScale?: boolean;
 }
 
@@ -37,6 +38,7 @@ class Map extends React.Component<MapProps, {}> {
     map: LeafletMap;
     tiles: L.TileLayer;
     path?: L.Polyline;
+    geoJson?: L.GeoJSON;
     marker: L.Marker;
     circle: L.CircleMarker;
     zoomButtons: L.Control;
@@ -74,6 +76,9 @@ class Map extends React.Component<MapProps, {}> {
             }
             if (this.scale) {
                 this.map.removeControl(this.scale);
+            }
+            if (this.geoJson) {
+                this.map.removeLayer(this.geoJson);
             }
             this.map.remove();
         }
@@ -149,6 +154,21 @@ class Map extends React.Component<MapProps, {}> {
                     nextTrack.path.map(this.addToPath);
                 }
             }
+
+            const nextGeoJson = nextProps.geoJson;
+            if (this.props.geoJson === undefined && nextGeoJson !== undefined) {
+                this.geoJson = L.geoJSON(this.props.geoJson).addTo(this.map);
+            } else if (this.props.geoJson !== undefined && nextGeoJson === undefined) {
+                if (this.geoJson) {
+                    this.map.removeLayer(this.geoJson);
+                    this.geoJson = undefined;
+                }
+            } else if (this.props.geoJson !== undefined && nextGeoJson !== undefined && this.props.geoJson !== nextGeoJson) {
+                if (this.geoJson) {
+                    this.map.removeLayer(this.geoJson);
+                }
+                this.geoJson = L.geoJSON(this.props.geoJson).addTo(this.map);
+            }
         }
     }
 
@@ -179,7 +199,6 @@ class Map extends React.Component<MapProps, {}> {
             this.map.on('zoomstart', this.onZoomStart);
             this.map.on('zoomend', this.onZoomEnd);
 
-            // L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
             this.tiles = L.tileLayer('/api/map/{z}/{x}/{y}', {
                 // attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                 maxNativeZoom: Math.min(MAX_ZOOM, props.mapConfig.maxZoom),
@@ -188,6 +207,10 @@ class Map extends React.Component<MapProps, {}> {
 
             if (this.props.showScale) {
                 this.scale = L.control.scale().addTo(this.map);
+            }
+
+            if (this.props.mapConfig && this.props.mapConfig.withGeoJson && this.props.geoJson) {
+                this.geoJson = L.geoJSON(this.props.geoJson).addTo(this.map);
             }
 
             if (!this.props.disableZoom) {

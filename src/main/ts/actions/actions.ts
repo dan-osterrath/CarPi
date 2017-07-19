@@ -7,7 +7,7 @@ import GPSEndpoint from '../api/GPSEndpoint';
 import MapConfiguration from '../api/model/MapConfiguration';
 import EventMessage from '../api/model/EventMessage';
 import GPSData from '../api/model/GPSData';
-import GPSPosition from "../api/model/GPSPosition";
+import GPSPosition from '../api/model/GPSPosition';
 
 const mapEndpoint: MapEndpoint = new MapEndpoint();
 const gpsEndpoint: GPSEndpoint = new GPSEndpoint();
@@ -16,6 +16,8 @@ const Actions = {
     REQUEST_INITIAL_DATA: 'app/INITIAL_DATA',
     REQUEST_MAP_CONFIG: 'map/REQUEST_CONFIG',
     RECEIVE_MAP_CONFIG: 'map/RECEIVE_CONFIG',
+    REQUEST_MAP_GEO_JSON: 'map/REQUEST_GEO_JSON',
+    RECEIVE_MAP_GEO_JSON: 'map/RECEIVE_GEO_JSON',
     REQUEST_GPS_DATA: 'gps/REQUEST_DATA',
     RECEIVE_GPS_DATA: 'gps/RECEIVE_DATA',
     REQUEST_GPS_POSITION: 'gps/REQUEST_POSITION',
@@ -36,6 +38,19 @@ const loadMapConfig = () => (dispatch: Dispatch<AppState>): Promise<void> => {
     dispatch(requestMapConfig());
     mapEndpoint.getMapConfig().then(response => {
         dispatch(receiveMapConfig(response));
+        if (response.withGeoJson) {
+            dispatch(loadMapGeoJson());
+        }
+    });
+    return Promise.resolve();
+};
+
+const requestMapGeoJson = createAction(Actions.REQUEST_MAP_GEO_JSON);
+const receiveMapGeoJson = createAction<GeoJSONGeoJsonObject, GeoJSONGeoJsonObject>(Actions.RECEIVE_MAP_GEO_JSON, (geoJson: GeoJSONGeoJsonObject) => geoJson);
+const loadMapGeoJson = () => (dispatch: Dispatch<AppState>): Promise<void> => {
+    dispatch(requestMapGeoJson);
+    mapEndpoint.getGeoJson().then(response => {
+        dispatch(receiveMapGeoJson(response));
     });
     return Promise.resolve();
 };
@@ -88,6 +103,10 @@ export {
     requestMapConfig,
     receiveMapConfig,
     loadMapConfig,
+
+    requestMapGeoJson,
+    receiveMapGeoJson,
+    loadMapGeoJson,
 
     requestGpsData,
     receiveGpsData,

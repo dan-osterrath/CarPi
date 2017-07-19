@@ -23,10 +23,10 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-		    <groupId>org.apache.tomcat</groupId>
-		    <artifactId>tomcat-websocket</artifactId>
-		    <version>${tomcat.version}</version>
-		    <scope>provided</scope>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-websocket</artifactId>
+			<version>${tomcat.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.weld.servlet</groupId>
@@ -52,6 +52,11 @@
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-jackson2-provider</artifactId>
 			<version>${resteasy.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.grundid.opendatalab</groupId>
+			<artifactId>geojson-jackson</artifactId>
+			<version>1.8</version>
 		</dependency>
 		<dependency>
 			<groupId>de.taimos</groupId>
@@ -84,9 +89,9 @@
 			<version>1.2</version>
 		</dependency>
 		<dependency>
-		    <groupId>com.github.pires</groupId>
-		    <artifactId>obd-java-api</artifactId>
-		    <version>1.0</version>
+			<groupId>com.github.pires</groupId>
+			<artifactId>obd-java-api</artifactId>
+			<version>1.0</version>
 		</dependency>
 	</dependencies>
 

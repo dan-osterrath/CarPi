@@ -1,7 +1,8 @@
 interface MapConfiguration {
     minZoom: number;
     maxZoom: number;
-    type?: 'PNG'|'VECTOR';
+    type?: 'JPEG'|'PNG'|'VECTOR';
+    withGeoJson: boolean;
 }
 
 export default MapConfiguration;

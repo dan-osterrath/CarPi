@@ -149,15 +149,18 @@ public class OBD2CarService implements CarService {
 				executeCommand(new SelectProtocolCommand(ObdProtocols.AUTO));
 
 				// get available PIDs
-				executeCommand(new AvailablePidsCommand_01_20());
-				executeCommand(new AvailablePidsCommand_21_40());
-				executeCommand(new AvailablePidsCommand_41_60());
+				Object pids_01_20 = executeCommand(new AvailablePidsCommand_01_20());
+				Object pids_21_40 = executeCommand(new AvailablePidsCommand_21_40());
+				Object pids_41_60 = executeCommand(new AvailablePidsCommand_41_60());
+				System.out.println(pids_01_20);
+				System.out.println(pids_21_40);
+				System.out.println(pids_41_60);
 			} catch (IOException e) {
 				log.log(Level.FINE, "No connection to ODB2 dongle", e);
 				closeConnection();
 				return;
 			} catch (InterruptedException e) {
-				log.log(Level.FINE, "Initializig the connection was interrupted", e);
+				log.log(Level.FINE, "Initializing the connection was interrupted", e);
 				closeConnection();
 				return;
 			}

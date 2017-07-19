@@ -12,6 +12,8 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.geojson.FeatureCollection;
+
 import net.packsam.carpi.model.MapConfiguration;
 import net.packsam.carpi.model.StreamedResource;
 import net.packsam.carpi.service.MapService;
@@ -41,6 +43,18 @@ public class MapEndpoint extends StreamingEndpoint {
 	@Produces(MediaType.APPLICATION_JSON)
 	public MapConfiguration getMapConfig() {
 		return mapService.getMapConfig();
+	}
+
+	/**
+	 * Returns the GeoJson file for the track.
+	 * 
+	 * @return GeoJson file
+	 */
+	@GET
+	@Path("/geojson")
+	@Produces(MediaType.APPLICATION_JSON)
+	public FeatureCollection getGeoJson() {
+		return mapService.getGeoJsonFeatures();
 	}
 
 	/**

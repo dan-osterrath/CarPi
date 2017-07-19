@@ -41,7 +41,7 @@ class MainNavigation extends React.Component<MainNavigationProps, {}> {
                     <BottomNavigationItem label="Dashboard" icon={<IconDashboard />} onClick={() => this.select(0)}/>
                     <BottomNavigationItem label="Karte" icon={<IconMap />} onClick={() => this.select(1)}/>
                     <BottomNavigationItem label="GPS" icon={<IconLocationOn />} onClick={() => this.select(2)} className={(!this.props.gpsMetaInfo || !this.props.gpsMetaInfo.numSatellites) ? styles.noGPS : ''} />
-                    <BottomNavigationItem label="Fahrzeug" icon={<IconCar />} onClick={() => this.select(3)} />
+                    <BottomNavigationItem label="Fahrzeug" icon={<IconCar />} onClick={() => null} />
                     <BottomNavigationItem label="CarPi" icon={<IconTablet />} onClick={() => this.select(4)} className={this.props.healthStatusOk ? '' : styles.healthWarning} />
                 </BottomNavigation>
             </Paper>

@@ -76,6 +76,11 @@ public class CarpiConfiguration {
 	private static final String PROP_MBTILES_FILES = "mbtiles.files";
 
 	/**
+	 * Property key for the GeoJson files to use for the map.
+	 */
+	private static final String PROP_GEOJSON_FILES = "geojson.files";
+
+	/**
 	 * Property key for the error threshold for latitude/longitude in m.
 	 */
 	private static final String PROP_ERROR_THRESHOLD_LONG_LAT = "threshold.error.lat-long";
@@ -240,6 +245,15 @@ public class CarpiConfiguration {
 	 */
 	public String getMBTilesFiles() {
 		return properties.getProperty(PROP_MBTILES_FILES, "carpi.mbtiles");
+	}
+
+	/**
+	 * Returns the path to the geojson files. Multiple files will be separated by ','.
+	 * 
+	 * @return geojson paths
+	 */
+	public String getGeoJsonFiles() {
+		return properties.getProperty(PROP_GEOJSON_FILES);
 	}
 
 	/**

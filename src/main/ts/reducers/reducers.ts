@@ -16,6 +16,7 @@ import * as HealthStatusUtils from '../helpers/HeathStatusUtils';
 interface AppState extends Readonly<{}> {
     mapConfig?: MapConfiguration;
     gpsData?: GPSData;
+    geoJson?: GeoJSONGeoJsonObject;
     healthStatus?: HealthStatus;
     websocketConnected: boolean;
     healthIsOk: boolean;
@@ -35,6 +36,16 @@ const reducers = handleActions<AppState, {}>(
             return {
                 ...state,
                 mapConfig: action.payload,
+            };
+        },
+
+        [Actions.RECEIVE_MAP_GEO_JSON]: (state: AppState, action: Action<GeoJSONGeoJsonObject>) => {
+            if (action.error || !action.payload) {
+                return state;
+            }
+            return {
+                ...state,
+                geoJson: action.payload,
             };
         },
 
@@ -145,6 +156,10 @@ function getMapConfig(state: AppState): MapConfiguration|undefined {
     return state.mapConfig;
 }
 
+function getGeoJson(state: AppState): GeoJSONGeoJsonObject|undefined {
+    return state.geoJson;
+}
+
 function getCurrentGPSData(state: AppState): GPSData|undefined {
     return state.gpsData;
 }
@@ -167,6 +182,7 @@ export {
     isWebSocketConnected,
     isHealthStatusOk,
     getMapConfig,
+    getGeoJson,
     getCurrentGPSData,
     getCurrentGPSPosition,
     getCurrentGPSMetaInfo,

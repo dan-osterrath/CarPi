@@ -28,6 +28,10 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.geojson.Feature;
+import org.geojson.FeatureCollection;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.packsam.carpi.config.CarpiConfiguration;
 import net.packsam.carpi.model.MapConfiguration;
@@ -50,6 +54,11 @@ public class MapService {
 	private final Pattern INDEX_COLUMNS = Pattern.compile(".+ ON .+ \\((.+)\\).*", Pattern.CASE_INSENSITIVE);
 
 	/**
+	 * Object mapper for parsing / creating GeoJson data.
+	 */
+	private final ObjectMapper GEO_JSON_MAPPER = new ObjectMapper();
+
+	/**
 	 * Lock object to access {@link MapService#lastMatchedMapFile}.
 	 */
 	private final Object LAST_MATCHED_MAP_FILE_LOCK = new Object();
@@ -68,6 +77,11 @@ public class MapService {
 	 * Map configuration for client.
 	 */
 	private MapConfiguration mapConfig;
+
+	/**
+	 * Optional GeoJson feature collection.
+	 */
+	private FeatureCollection geoJsonFeatures;
 
 	/**
 	 * Class logger.
@@ -93,6 +107,21 @@ public class MapService {
 				.map(this::openMBTilesFile) //
 				.filter(Objects::nonNull) //
 				.collect(Collectors.toList());
+
+		String geoJsonFiles = config.getGeoJsonFiles();
+		if (StringUtils.isNotEmpty(geoJsonFiles)) {
+			// read all GeoJson files and merge their features into a single feature collection
+			List<Feature> features = Arrays.asList(geoJsonFiles.split(",")).stream() //
+					.map(StringUtils::trimToNull) //
+					.filter(Objects::nonNull) //
+					.map(this::openGeoJsonFile) //
+					.filter(Objects::nonNull) //
+					.map(FeatureCollection::getFeatures) //
+					.flatMap(List::stream) //
+					.collect(Collectors.toList());
+			this.geoJsonFeatures = new FeatureCollection();
+			this.geoJsonFeatures.addAll(features);
+		}
 
 		// create map configuration
 		this.mapConfig = createMapConfig();
@@ -221,7 +250,7 @@ public class MapService {
 			}
 		}
 		long end = System.currentTimeMillis();
-		log.log(Level.INFO, "Creating index took {0}s", (double)(end-start) / 1000.0);
+		log.log(Level.INFO, "Creating index took {0}s", (double) (end - start) / 1000.0);
 	}
 
 	/**
@@ -257,10 +286,13 @@ public class MapService {
 			}
 		}
 
-		if (StringUtils.equalsIgnoreCase("png", format)) {
+		if (StringUtils.equalsIgnoreCase(format, "png")) {
 			mapFile.tilesMimeType = "image/png";
 			mapFile.tilesFileExtension = ".png";
-		} else if (StringUtils.equalsIgnoreCase("pbf", format)) {
+		} else if (StringUtils.equalsAnyIgnoreCase(format, "jpg", "jpeg")) {
+			mapFile.tilesMimeType = "image/jpeg";
+			mapFile.tilesFileExtension = ".jpg";
+		} else if (StringUtils.equalsIgnoreCase(format, "pbf")) {
 			mapFile.tilesMimeType = "application/octet-stream";
 			mapFile.tilesFileExtension = ".pbf";
 		} else {
@@ -328,6 +360,8 @@ public class MapService {
 			}
 		});
 
+		c.setWithGeoJson(this.geoJsonFeatures != null && !this.geoJsonFeatures.getFeatures().isEmpty());
+
 		return c;
 	}
 
@@ -339,7 +373,9 @@ public class MapService {
 	 * @return tiles type
 	 */
 	private MapConfiguration.TilesType getTitlesType(MapFile mf) {
-		if (StringUtils.endsWithIgnoreCase(mf.tilesFileExtension, "png")) {
+		if (StringUtils.endsWithIgnoreCase(mf.tilesFileExtension, "jpeg") || StringUtils.endsWithIgnoreCase(mf.tilesFileExtension, "jpg")) {
+			return TilesType.JPEG;
+		} else if (StringUtils.endsWithIgnoreCase(mf.tilesFileExtension, "png")) {
 			return TilesType.PNG;
 		} else if (StringUtils.endsWithIgnoreCase(mf.tilesFileExtension, "pbf")) {
 			return TilesType.VECTOR;
@@ -376,6 +412,15 @@ public class MapService {
 	 */
 	public MapConfiguration getMapConfig() {
 		return mapConfig;
+	}
+
+	/**
+	 * Returns the GeoJson features.
+	 * 
+	 * @return GeoJson features or null
+	 */
+	public FeatureCollection getGeoJsonFeatures() {
+		return geoJsonFeatures;
 	}
 
 	/**
@@ -520,6 +565,29 @@ public class MapService {
 		return mapFiles.stream() //
 				.filter(mf -> mf.minZ <= z && mf.maxZ >= z) //
 				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Opens the GeoJson file and parses it.
+	 * 
+	 * @param fileName
+	 *            file name to read
+	 * @return featre collection of GeoJson file
+	 */
+	private FeatureCollection openGeoJsonFile(String fileName) {
+		File geoJsonFile = new File(fileName);
+		if (geoJsonFile.exists() && geoJsonFile.canRead() && geoJsonFile.isFile()) {
+			FeatureCollection featureCollection;
+			try {
+				featureCollection = GEO_JSON_MAPPER.readValue(geoJsonFile, FeatureCollection.class);
+				return featureCollection;
+			} catch (IOException e) {
+				log.log(Level.WARNING, "Could not read GeoJson file", e);
+			}
+		} else {
+			log.log(Level.WARNING, "Could not open GeoJson file {0}", fileName);
+		}
+		return null;
 	}
 
 	/**
