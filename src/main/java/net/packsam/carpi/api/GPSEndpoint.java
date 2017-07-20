@@ -102,7 +102,7 @@ public class GPSEndpoint {
 
 			@Override
 			public void write(OutputStream output) throws IOException, WebApplicationException {
-				trackingService.writeCurrentPathToStream(output);
+				trackingService.writeCurrentPathAsKMLToStream(output);
 			}
 		};
 		return Response.ok(streamingOutput) //
@@ -110,4 +110,24 @@ public class GPSEndpoint {
 				.build();
 	}
 
+	/**
+	 * Returns the current track as GPX file.
+	 * 
+	 * @return gpx file
+	 */
+	@GET
+	@Path("/track/gpx")
+	@Produces("application/gpx+xml")
+	public Response getCurrentTrackAsGPX() {
+		StreamingOutput streamingOutput = new StreamingOutput() {
+
+			@Override
+			public void write(OutputStream output) throws IOException, WebApplicationException {
+				trackingService.writeCurrentPathAsGPXToStream(output);
+			}
+		};
+		return Response.ok(streamingOutput) //
+				.header("Content-Disposition", "attachment; filename=\"track.gpx\"") //
+				.build();
+	}
 }

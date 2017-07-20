@@ -15,12 +15,18 @@ import {AppState, getMapConfig} from '../../reducers/reducers';
 const MAX_ZOOM = 17;
 const CLASS_DISABLED = 'leaflet-disabled';
 
+interface PointDetails {
+    name: string;
+    description: string;
+}
+
 interface MapComponentProps {
     disableZoom?: boolean;
     position?: GPSPosition;
     track?: GPSTrack;
     geoJson?: GeoJSONGeoJsonObject;
     showScale?: boolean;
+    onShowDetails?: (details: PointDetails) => void;
 }
 
 interface ContainerDispatchProps {
@@ -476,8 +482,8 @@ class Map extends React.Component<MapProps, {}> {
 
     private handleGeoJsonFeature = (feature: GeoJSONFeature<GeoJSONGeometryObject>, layer: L.Layer): void => {
         if (feature.geometry.type === 'Point' && feature.properties) {
-            let name = null;
-            let description = null;
+            let name: string | null = null;
+            let description: string | null = null;
             /* tslint:disable:no-string-literal */
             if (feature.properties.hasOwnProperty('name')) {
                 name = feature.properties['name'];
@@ -489,9 +495,15 @@ class Map extends React.Component<MapProps, {}> {
             }
             /* tslint:enable:no-string-literal */
 
-            if (name && description) {
-                layer.bindPopup(`<h1>${name}</h1><p>${description}</p>`);
+            if (name !== null && description !== null) {
+                layer.on('click', (e) => this.showGeoJsonInfo({name: name || '', description: description || ''}));
             }
+        }
+    };
+
+    private showGeoJsonInfo(details: PointDetails): void {
+        if (this.props.onShowDetails) {
+            this.props.onShowDetails(details);
         }
     }
 }
@@ -502,5 +514,9 @@ const Map$$ = connect<ContainerStateProps, ContainerDispatchProps, ContainerOwnP
     }),
     (dispatch, ownProps: ContainerOwnProps): ContainerDispatchProps => ({})
 )(Map);
+
+export {
+    PointDetails,
+};
 
 export default Map$$;

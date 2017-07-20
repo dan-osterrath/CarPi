@@ -9,7 +9,8 @@ import * as styles from './Dashboard.scss';
 import SpeedIcon from '../../icons/SpeedIcon';
 import DistanceIcon from '../../icons/DistanceIcon';
 import GasIcon from '../../icons/GasIcon';
-import Map from '../../components/map/Map';
+import Map, {PointDetails} from '../../components/map/Map';
+import MapPointDetails from '../../components/mapPointDetails/MapPointDetails';
 
 import GPSData from '../../api/model/GPSData';
 import {AppState, getCurrentGPSData, getGeoJson} from '../../reducers/reducers';
@@ -34,7 +35,16 @@ type ContainerOwnProps = ProviderProps;
 
 type DashboardProps = ContainerOwnProps & ContainerStateProps & ContainerDispatchProps;
 
-class Dashboard extends React.Component<DashboardProps, {}> {
+interface DashboardState {
+    mapPointDetails?: PointDetails;
+}
+
+class Dashboard extends React.Component<DashboardProps, DashboardState> {
+
+    constructor(props: DashboardProps) {
+        super(props);
+        this.state = {};
+    }
 
     componentDidMount() {
         this.props.loadGpsData();
@@ -69,6 +79,8 @@ class Dashboard extends React.Component<DashboardProps, {}> {
 
         return (
             <div className={styles.dashboard}>
+                <MapPointDetails details={this.state.mapPointDetails} onClose={this.closeMapPointDetails}/>
+
                 <Paper zDepth={1} className={styles.infoPaper}>
                     <Card>
                         <CardMedia>
@@ -124,11 +136,26 @@ class Dashboard extends React.Component<DashboardProps, {}> {
                         track={this.props.gpsData ? this.props.gpsData.track : undefined}
                         geoJson={this.props.geoJson}
                         showScale={true}
+                        onShowDetails={this.showMapPointDetails}
                     />
                 </Paper>
             </div>
         );
     }
+
+    private showMapPointDetails = (details: PointDetails): void => {
+        this.setState({
+            ...this.state,
+            mapPointDetails: details,
+        });
+    };
+
+    private closeMapPointDetails = (btnClicked: boolean): void => {
+        this.setState({
+            ...this.state,
+            mapPointDetails: undefined,
+        });
+    };
 }
 
 const Dashboard$$ = connect<ContainerStateProps, ContainerDispatchProps, ContainerOwnProps>(

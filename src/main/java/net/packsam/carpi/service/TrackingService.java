@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
@@ -30,6 +30,10 @@ import org.gavaghan.geodesy.GlobalPosition;
 import de.micromata.opengis.kml.v_2_2_0.Kml;
 import de.micromata.opengis.kml.v_2_2_0.LineString;
 import de.micromata.opengis.kml.v_2_2_0.Placemark;
+import io.jenetics.jpx.GPX;
+import io.jenetics.jpx.Track;
+import io.jenetics.jpx.TrackSegment;
+import io.jenetics.jpx.WayPoint;
 import net.packsam.carpi.config.CarpiConfiguration;
 import net.packsam.carpi.event.GPSPositionChangeEvent;
 import net.packsam.carpi.event.GPSTrackChangeEvent;
@@ -57,14 +61,9 @@ public class TrackingService {
 	private final DateFormat TRACKING_FILE_NAME = new SimpleDateFormat("'track-'yyyy-MM-dd_HH-mm'.csv'");
 
 	/**
-	 * Date format for the KML tracking files.
+	 * Date format for KML/GPS track title.
 	 */
-	private final DateFormat KML_FILE_NAME = new SimpleDateFormat("'track-'yyyy-MM-dd_HH-mm'.kml'");
-
-	/**
-	 * Date format for KML track title.
-	 */
-	private final DateFormat KML_TITLE_DATE_FORMAT = new SimpleDateFormat("dd.MMMM.yyyy HH:mm");
+	private final DateFormat TRACK_TITLE_DATE_FORMAT = new SimpleDateFormat("dd.MMMM.yyyy HH:mm");
 
 	/**
 	 * Calculator for geo calculations.
@@ -140,7 +139,7 @@ public class TrackingService {
 	 */
 	@Inject
 	private Event<GPSTrackChangeEvent> gpsTrackChangeEvent;
-	
+
 	/**
 	 * Initializes the tracking service.
 	 */
@@ -156,15 +155,6 @@ public class TrackingService {
 		} else {
 			targetDir = new File(System.getProperty("user.dir"));
 		}
-	}
-
-	/**
-	 * Closes the tracking service.
-	 */
-	@PreDestroy
-	private void destroy() {
-		// writes the current track to disc before shutting down
-		writeKMLFile(currentPath);
 	}
 
 	/**
@@ -226,15 +216,10 @@ public class TrackingService {
 		}
 
 		gpsTrackChangeEvent.fire(new GPSTrackChangeEvent(currentPath));
-		
+
 		// append to tracking file async
 		final boolean newTFFinal = newTrackingFile;
 		executorService.execute(() -> appendTrackElementToTrackingFile(location, newTFFinal));
-
-		// create KML file after pause
-		if (newTrackingFile) {
-			executorService.execute(() -> writeKMLFile(currentPath));
-		}
 	}
 
 	/**
@@ -262,25 +247,6 @@ public class TrackingService {
 	}
 
 	/**
-	 * Writes the given track as KML file.
-	 * 
-	 * @param track
-	 *            track to write
-	 */
-	private void writeKMLFile(List<GPSPathElement> track) {
-		if (track == null || track.isEmpty()) {
-			return;
-		}
-		long startDate = track.get(0).getTimestamp();
-		Kml kml = createKMLObject(track);
-		try {
-			kml.marshal(new File(targetDir, KML_FILE_NAME.format(startDate)));
-		} catch (IOException e) {
-			log.log(Level.WARNING, "Could not write KML file", e);
-		}
-	}
-
-	/**
 	 * Creates a KML object from the given track.
 	 * 
 	 * @param track
@@ -292,13 +258,13 @@ public class TrackingService {
 		if (track.size() == 1) {
 			GPSPathElement el = track.get(0);
 			long date = el.getTimestamp();
-			name = KML_TITLE_DATE_FORMAT.format(date);
+			name = TRACK_TITLE_DATE_FORMAT.format(date);
 		} else {
 			GPSPathElement firstEl = track.get(0);
 			GPSPathElement lastEl = track.get(track.size() - 1);
 			long firstDate = firstEl.getTimestamp();
 			long lastDate = lastEl.getTimestamp();
-			name = String.format("%s - %s", KML_TITLE_DATE_FORMAT.format(firstDate), KML_TITLE_DATE_FORMAT.format(lastDate));
+			name = String.format("%s - %s", TRACK_TITLE_DATE_FORMAT.format(firstDate), TRACK_TITLE_DATE_FORMAT.format(lastDate));
 		}
 
 		Kml kml = new Kml();
@@ -307,6 +273,49 @@ public class TrackingService {
 		LineString lineString = placemark.createAndSetLineString();
 		track.stream().forEachOrdered(pe -> lineString.addToCoordinates(pe.getLongitude(), pe.getLatitude(), pe.getAltitude()));
 		return kml;
+	}
+
+	/**
+	 * Creates a GPX object from the given track.
+	 * 
+	 * @param track
+	 *            track
+	 * @return GPX object
+	 */
+	private GPX createGPXObject(List<GPSPathElement> track) {
+		String name;
+		if (track.size() == 1) {
+			GPSPathElement el = track.get(0);
+			long date = el.getTimestamp();
+			name = TRACK_TITLE_DATE_FORMAT.format(date);
+		} else {
+			GPSPathElement firstEl = track.get(0);
+			GPSPathElement lastEl = track.get(track.size() - 1);
+			long firstDate = firstEl.getTimestamp();
+			long lastDate = lastEl.getTimestamp();
+			name = String.format("%s - %s", TRACK_TITLE_DATE_FORMAT.format(firstDate), TRACK_TITLE_DATE_FORMAT.format(lastDate));
+		}
+
+		TrackSegment segment = TrackSegment.of( //
+				track.stream()//
+						.map(pe -> WayPoint.of( //
+								pe.getLatitude(), //
+								pe.getLongitude(), //
+								pe.getAltitude(), //
+								pe.getTimestamp() //
+						)) //
+						.collect(Collectors.toList()) //
+		);
+		Track t = Track.builder() //
+				.name(name) //
+				.addSegment(segment) //
+				.build();
+
+		GPX gpx = GPX.builder() //
+				.addTrack(t) //
+				.build();
+
+		return gpx;
 	}
 
 	/**
@@ -327,8 +336,20 @@ public class TrackingService {
 	 *            target output stream
 	 * @throws IOException
 	 */
-	public void writeCurrentPathToStream(OutputStream os) throws IOException {
+	public void writeCurrentPathAsKMLToStream(OutputStream os) throws IOException {
 		createKMLObject(currentPath).marshal(os);
+	}
+
+	/**
+	 * Writes the current path as GPX to the given output stream.
+	 * 
+	 * @param os
+	 *            target output stream
+	 * @throws IOException
+	 */
+	public void writeCurrentPathAsGPXToStream(OutputStream os) throws IOException {
+		GPX gpx = createGPXObject(currentPath);
+		GPX.write(gpx, os);
 	}
 
 	/**

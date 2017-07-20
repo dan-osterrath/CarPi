@@ -2,7 +2,8 @@ import * as React from 'react';
 import {connect, ProviderProps} from 'react-redux';
 
 import * as styles from './MapScreen.scss';
-import Map from '../../components/map/Map';
+import Map, {PointDetails} from '../../components/map/Map';
+import MapPointDetails from '../../components/mapPointDetails/MapPointDetails';
 
 import {AppState, getCurrentGPSData, getGeoJson} from '../../reducers/reducers';
 import GPSData from '../../api/model/GPSData';
@@ -27,10 +28,15 @@ type ContainerOwnProps = ProviderProps;
 
 type MapScreenProps = ContainerOwnProps & ContainerStateProps & ContainerDispatchProps;
 
-class MapScreen extends React.Component<MapScreenProps, {}> {
+interface MapScreenState {
+    mapPointDetails?: PointDetails;
+}
+
+class MapScreen extends React.Component<MapScreenProps, MapScreenState> {
 
     constructor(props: MapScreenProps) {
         super(props);
+        this.state = {};
     }
 
     componentDidMount() {
@@ -47,15 +53,32 @@ class MapScreen extends React.Component<MapScreenProps, {}> {
     render() {
         return (
             <div className={styles.mapScreen}>
+                <MapPointDetails details={this.state.mapPointDetails} onClose={this.closeMapPointDetails}/>
+
                 <Map
                     position={this.props.gpsData ? this.props.gpsData.position : undefined}
                     track={this.props.gpsData ? this.props.gpsData.track : undefined}
                     geoJson={this.props.geoJson}
                     showScale={true}
+                    onShowDetails={this.showMapPointDetails}
                 />
             </div>
         );
     }
+
+    private showMapPointDetails = (details: PointDetails): void => {
+        this.setState({
+            ...this.state,
+            mapPointDetails: details,
+        });
+    };
+
+    private closeMapPointDetails = (btnClicked: boolean): void => {
+        this.setState({
+            ...this.state,
+            mapPointDetails: undefined,
+        });
+    };
 }
 
 const MapScreen$$ = connect<ContainerStateProps, ContainerDispatchProps, ContainerOwnProps>(

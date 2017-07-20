@@ -58,7 +58,7 @@ public class DaylightService {
 	private void initialize() {
 		updateData();
 	}
-
+	
 	/**
 	 * Updates the data for the current position.
 	 */

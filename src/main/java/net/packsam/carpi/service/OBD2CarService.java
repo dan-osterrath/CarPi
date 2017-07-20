@@ -109,7 +109,7 @@ public class OBD2CarService implements CarService {
 	private void initialize() {
 		String host = config.getOBD2WLANHost();
 		Integer port = config.getOBD2WLANPort();
-		if (StringUtils.isNotEmpty(host) && port != null) {
+		if (StringUtils.isNotEmpty(host) && port != null && port > 0) {
 			connectTask = executorService.scheduleAtFixedRate(() -> connect(), 0, 20, TimeUnit.SECONDS);
 		}
 	}
@@ -119,9 +119,11 @@ public class OBD2CarService implements CarService {
 	 */
 	@PreDestroy
 	private void shutdown() {
+		long start = System.currentTimeMillis();
 		synchronized (SOCKET_LOCK) {
 			closeConnection();
 		}
+		log.info("Shutting down took " + (System.currentTimeMillis() - start) + "ms");
 	}
 
 	/**
