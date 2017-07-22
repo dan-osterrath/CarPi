@@ -143,17 +143,22 @@ public class RaspbianHealthService implements HealthService {
 			vcgencmdCPUVoltagePB = new ProcessBuilder(config.getVcgencmdPath(), "measure_volts");
 			freePB = new ProcessBuilder(config.getFreePath(), "-b");
 			dfPB = new ProcessBuilder(config.getDfPath(), "-l", "-T", "-BK", "/");
-			lifepo4weredCliInputVoltagePB = new ProcessBuilder(config.getLifepo4weredCliPath(), "get", "vin");
-			lifepo4weredCliBatteryVoltagePB = new ProcessBuilder(config.getLifepo4weredCliPath(), "get", "vbat");
+			String lifepo4weredCliPath = config.getLifepo4weredCliPath();
+			if (StringUtils.isNotEmpty(lifepo4weredCliPath)) {
+				lifepo4weredCliInputVoltagePB = new ProcessBuilder(lifepo4weredCliPath, "get", "vin");
+				lifepo4weredCliBatteryVoltagePB = new ProcessBuilder(lifepo4weredCliPath, "get", "vbat");
+			}
 			loadAvgFile = new File(config.getLoadavgPath());
 			cpuTemperatureFile = new File(config.getCPUTemperaturePath());
-		}
 
-		executorService.scheduleAtFixedRate(() -> readCPUUtilisation(), 0, 10, TimeUnit.SECONDS);
-		executorService.scheduleAtFixedRate(() -> readCPUStatus(), 0, 60, TimeUnit.SECONDS);
-		executorService.scheduleAtFixedRate(() -> readMemoryUsage(), 0, 60, TimeUnit.SECONDS);
-		executorService.scheduleAtFixedRate(() -> readDiscUsage(), 0, 10, TimeUnit.MINUTES);
-		executorService.scheduleAtFixedRate(() -> readLifepo4weredStatus(), 5, 10, TimeUnit.SECONDS);
+			executorService.scheduleAtFixedRate(() -> readCPUUtilisation(), 0, 10, TimeUnit.SECONDS);
+			executorService.scheduleAtFixedRate(() -> readCPUStatus(), 0, 60, TimeUnit.SECONDS);
+			executorService.scheduleAtFixedRate(() -> readMemoryUsage(), 0, 60, TimeUnit.SECONDS);
+			executorService.scheduleAtFixedRate(() -> readDiscUsage(), 0, 10, TimeUnit.MINUTES);
+			if (StringUtils.isNotEmpty(lifepo4weredCliPath)) {
+				executorService.scheduleAtFixedRate(() -> readLifepo4weredStatus(), 5, 10, TimeUnit.SECONDS);
+			}
+		}
 	}
 
 	/*

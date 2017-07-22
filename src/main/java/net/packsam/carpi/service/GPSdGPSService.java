@@ -168,6 +168,9 @@ public class GPSdGPSService implements GPSService {
 		@Override
 		public void handleTPV(TPVObject tpv) {
 			log.log(Level.FINE, "Received TPV {0}", tpv);
+			if (tpv.getLongitude() == 0 && tpv.getLatitude() == 0) {
+				return;
+			}
 			synchronized (LAST_POSITION_LOCK) {
 				lastPosition = new GPSPosition();
 				lastPosition.setLongitude(mapValue(tpv.getLongitude()));

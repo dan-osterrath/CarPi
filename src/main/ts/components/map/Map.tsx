@@ -18,6 +18,7 @@ const CLASS_DISABLED = 'leaflet-disabled';
 interface PointDetails {
     name: string;
     description: string;
+    position?: L.LatLng;
 }
 
 interface MapComponentProps {
@@ -482,8 +483,9 @@ class Map extends React.Component<MapProps, {}> {
 
     private handleGeoJsonFeature = (feature: GeoJSONFeature<GeoJSONGeometryObject>, layer: L.Layer): void => {
         if (feature.geometry.type === 'Point' && feature.properties) {
-            let name: string | null = null;
-            let description: string | null = null;
+            let name: string | undefined = undefined;
+            let description: string | undefined = undefined;
+            let position: L.LatLng | undefined = undefined;
             /* tslint:disable:no-string-literal */
             if (feature.properties.hasOwnProperty('name')) {
                 name = feature.properties['name'];
@@ -493,10 +495,14 @@ class Map extends React.Component<MapProps, {}> {
             if (feature.properties.hasOwnProperty('description')) {
                 description = feature.properties['description'];
             }
+            if (feature.geometry.hasOwnProperty('coordinates')) {
+                const coordinates: number[] = feature.geometry['coordinates'];
+                position = new L.LatLng(coordinates[1], coordinates[0]);
+            }
             /* tslint:enable:no-string-literal */
 
             if (name !== null && description !== null) {
-                layer.on('click', (e) => this.showGeoJsonInfo({name: name || '', description: description || ''}));
+                layer.on('click', (e) => this.showGeoJsonInfo({name: name || '', description: description || '', position}));
             }
         }
     };
